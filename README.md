@@ -198,8 +198,8 @@ The configurable properties are:
 | `<datasource>.column.filter`        | Optional. A list of comma-separated column names that will be included in the hash. Columns not mentioned in this list will be excluded from the hashing and validation. This value is case-insensitive |
 | `<datasource>.max.rows`             | Optional. Limits the maximum number of rows per table to be hashed. Could be useful for test runs of for debugging if you want to work with a small and fast data set |
 | `<datasource>.select.autocommit`    | Optional. Overrides the default autocommit mode for SELECT queries. PostgreSQL defaults to `false` while the other databases default to `true`. This autocommit mode is used to run large SELECT queries. For more details see the section **Autocommit While Reading** below |
-| `<datasource>.type.rules`           | Optional. Rules to override the default Java types used for each database type; it's a semicolon-separated list of rules; each rule takes the form `<database-type>:<java-type>`. For example, if you want Oracle DATE columns to be read as java.time.LocalDate (instead of the default type java.time.LocalDateTime) use: `date:localdate`. Use the `listcolumns` command to show to the active Java types for each column according to the default or active rules. the rule definition is case-insensitive. For more details see the section **Type Rules** below |
-| `<datasource>.hashing.ordering` | Optional. Declares hashing ordering. It overrides the primary key ordering for tables with primary keys, and declares a specific ordering for tables with no primary keys. It takes the form of a semicolon-separated list of table sorting rules, where each rule takes the form `<table>:<member>,<member>,...`; each member is a column name optionally followed by `/desc` to specify descending ordering on an index, and/or `/nf` or `/nl` to specify NULLS FIRST or NULLS LAST respectively ; nulls ordering may or not be supported by all databases. For more details see the section **Hashing Ordering** below |
+| `<datasource>.type.rules`           | Optional. Rules to override the default Java types used for each database type; it's a semicolon-separated list of rules. For more details see the section **Type Rules** below |
+| `<datasource>.hashing.ordering` | Optional. Declares hashing ordering. It overrides the primary key ordering for tables with primary keys, and declares a specific ordering for tables with no primary keys. It takes the form of a semicolon-separated list of table sorting rules. For more details see the section **Hashing Ordering** below |
 | `<datasource>.readonly` | Optional. Declares this datasource as readonly (default) or writable. This property is  a safeguard to protect the datasources when copying data. A destination datasouce needs to be explicitly set as writable (`readonly=false`) for the `copy` command to work |
 | `<datasource>.insert.batch.size` | Optional. Declares the insert batch size when copying data from one database to another. Defaults to 100 |
 
@@ -255,9 +255,9 @@ $ java -jar highfive-1.2.0.jar listtables src
 2024-08-12 11:54:32.608 INFO  -   varchar(20) [string]: 2
 2024-08-12 11:54:32.608 INFO  -  
 2024-08-12 11:54:32.608 INFO  - Row Count:
-2024-08-12 11:54:32.612 INFO  -   client: 101782 rows
-2024-08-12 11:54:32.615 INFO  -   invoice: 25668 rows
-2024-08-12 11:54:32.615 INFO  -   payment: 22018 rows
+2024-08-12 11:54:32.612 INFO  -   client: 101,782 rows
+2024-08-12 11:54:32.615 INFO  -   invoice: 25,668 rows
+2024-08-12 11:54:32.615 INFO  -   payment: 22,018 rows
 2024-08-12 11:54:32.615 INFO  -  
 2024-08-12 11:54:32.615 INFO  - Hashing preconditions:
 2024-08-12 11:54:32.620 INFO  -   All tables found (3/3) - PASS
@@ -285,9 +285,9 @@ $ java -jar highfive-1.2.0.jar listtables dest
 2024-07-31 09:37:46.727 INFO  -  - payment
 2024-07-31 09:37:46.727 INFO  -  
 2024-07-31 09:37:46.727 INFO  -  Row Count:
-2024-07-31 09:37:46.727 INFO  -    client: 101782 rows
-2024-07-31 09:37:46.727 INFO  -    invoice: 25668 rows
-2024-07-31 09:37:46.727 INFO  -    payment: 22018 rows
+2024-07-31 09:37:46.727 INFO  -    client: 101,782 rows
+2024-07-31 09:37:46.727 INFO  -    invoice: 25,668 rows
+2024-07-31 09:37:46.727 INFO  -    payment: 22,018 rows
 2024-07-31 09:37:46.727 INFO  -  
 2024-07-31 09:37:46.727 INFO  - Checking hashing preconditions:
 2024-07-31 09:37:46.727 INFO  - Checking schema...
@@ -315,11 +315,11 @@ $ java -jar highfive-1.2.0.jar hash src
 2024-07-31 09:42:44.243 INFO  -   schema: mychame
 2024-07-31 09:42:44.584 INFO  -  
 2024-07-31 09:42:44.626 INFO  - Reading table: client
-2024-07-31 09:42:44.633 INFO  -   101782 row(s) read
+2024-07-31 09:42:44.633 INFO  -   101,782 row(s) read
 2024-07-31 09:42:44.670 INFO  - Reading table: invoice
-2024-07-31 09:42:44.737 INFO  -   25668 row(s) read
+2024-07-31 09:42:44.737 INFO  -   25,668 row(s) read
 2024-07-31 09:42:44.811 INFO  - Reading table: payment
-2024-07-31 09:42:44.813 INFO  -   22018 row(s) read
+2024-07-31 09:42:44.813 INFO  -   22,018 row(s) read
 2024-07-31 09:42:44.814 INFO  -  
 2024-07-31 09:42:44.814 INFO  - Data hashes generated to: src.hash
 ```
@@ -351,11 +351,11 @@ $ java -jar highfive-1.2.0.jar verify dest src.hash
 2024-07-31 09:46:18.264 INFO  -   schema: otherschema
 2024-07-31 09:46:18.700 INFO  -  
 2024-07-31 09:46:18.714 INFO  - Reading table: client
-2024-07-31 09:46:18.725 INFO  -   101782 row(s) read
+2024-07-31 09:46:18.725 INFO  -   101,782 row(s) read
 2024-07-31 09:46:18.732 INFO  - Reading table: invoice
-2024-07-31 09:46:18.738 INFO  -   25668 row(s) read
+2024-07-31 09:46:18.738 INFO  -   25,668 row(s) read
 2024-07-31 09:46:18.745 INFO  - Reading table: payment
-2024-07-31 09:46:18.748 INFO  -   22018 row(s) read
+2024-07-31 09:46:18.748 INFO  -   22,018 row(s) read
 2024-07-31 09:46:18.748 INFO  -  
 2024-07-31 09:46:18.748 INFO  - Data hashes generated to: dest.hash
 2024-07-31 09:46:18.748 INFO  -  
@@ -436,12 +436,12 @@ $ java -jar highfive-1.2.0 copy src dest
 2024-08-13 11:01:00.874 INFO  -   quadrant: 0 rows
 2024-08-13 11:01:00.875 INFO  -  
 2024-08-13 11:01:00.875 INFO  - Copying table client:
-2024-08-13 11:01:00.968 INFO  -   101782 row(s) copied
+2024-08-13 11:01:00.968 INFO  -   101,782 row(s) copied
 2024-08-13 11:01:00.969 INFO  - Copying table invoice:
-2024-08-13 11:01:01.001 INFO  -   25668 row(s) copied
+2024-08-13 11:01:01.001 INFO  -   25,668 row(s) copied
 2024-08-13 11:01:01.002 INFO  - Copying table payment:
-2024-08-13 11:01:02.063 INFO  -   22018 row(s) copied
-2024-08-13 11:01:02.063 INFO  - Copy complete -- Grand total of 9 row(s) copied
+2024-08-13 11:01:02.063 INFO  -   22,018 row(s) copied
+2024-08-13 11:01:02.063 INFO  - Copy complete -- Grand total of 149,468 row(s) copied
 ```
 
 **Note**: There's an issue when copying data to MySQL. The MySQL Connector/J JDBC driver is buggy (at least up to version 9.0.0) when inserting a LocalDate or LocalDateTime into DATE or DATETIME columns respectively; it shifts the value by the time zone difference between the application and the database server/session if they are not perfectly aligned. This can end up inserting DATEs as the day before or day after, and DATETIMEs shifted forward or backward a few/many of hours. This bug does not affect MariaDB.
@@ -473,22 +473,11 @@ In any application, there are multiple ways of reading a column of a table. For 
 produce a different when read as an `short`, `int`, or `long`. That would defeat the purpose of the
 hash comparison.
 
-Most of the time the java types automatically selected by this tool are adequate and stable for hashing. However, there are some exceptions, particularly for database types that are old badly defined.
+Declared rules supersede default ones. Type rules can be declared per datasource using the property `<database-type>:<java-type>`. One or more rules can be specified in the datasource as a semicolon-separated list of rules using the property `<datasource>.type.rules`. The rules are case-insensitive.
 
-For example, the `DATE` type in the Oracle database seems to imply that stores dates without time, but in fact stores both. By default, this tool reads these data as `LocalDateTime` to preserve the time component of it. However, when the data is migrated only the date part makes it through. If you wanted to read `DATE` columns just as `LocalDate` you could do so by adding a rule in the form `<database-type>:<java-type>`; in this case this rule can look like:
+You can use the command `listcolumns` to display the *effective* java type for a column before/after you declare type rules.
 
-```bash
-  <datasource>.type.rules=date:localdate
-```
-
-One or more rules can be specified in the datasource as a semicolon-separated list of rules using the property `<datasource>.type.rules`. The rules are case-insensitive.
-
-As an additional example, if you wanted to read all `DATE` columnas as `localdate` (discarding the
-time component) and all `NUMBER(9, 0)` as `integer` values (assuming none exceeds 2^63-1) you could define the rule:
-
-```bash
-  <datasource>.type.rules=date:localdate;number(9, 0):integer
-```
+#### Available Java Types
 
 The available java-types are:
 
@@ -507,6 +496,25 @@ The available java-types are:
 | zoneddatetime  | Used for date values with time and time zone components |
 | bytearray  | Used for binary data (BLOB, BINARY, VARBINARY, etc.) |
 | boolean    | Used for boolean values (implemented in PostgreSQL) |
+
+Most of the time the java types automatically selected by this tool are adequate and stable for hashing. However, there are some exceptions, particularly for database or database types that are old or badly defined.
+
+#### Examples
+
+For example, the `DATE` type in the Oracle database seems to imply that it stores dates without time, but in fact it stores both. By default, this tool reads this data as `LocalDateTime` to preserve the time component of it. However, when the data is migrated maybe only the date part ends up making it through to the other database; for verification purposes that would require you to compare them as plain dates. Therefore, if you wanted to read `DATE` columns just as `LocalDate` (discarding the time component) you could do so by adding a rule in the form `<database-type>:<java-type>`; in this case this rule can look like:
+
+```bash
+  <datasource>.type.rules=date:localdate
+```
+
+
+As an additional example, if you wanted to read all `DATE` columnas as `localdate` (discarding the
+time component) and all `NUMBER(9, 0)` as `integer` values (assuming none exceeds 2^63-1) you could define the rule:
+
+```bash
+  <datasource>.type.rules=date:localdate;number(9, 0):integer
+```
+
 
 ### 3. Hashing Ordering
 
@@ -542,6 +550,8 @@ such as `BOOLEAN`, `XML`, arrays, `IMAGE`, `BLOB`, etc.
 **Note**: Unfortunately, deciding if a column is sortable can only be determined by the database
 itself. For special and/or exotic data types this can only be found by actually trying to hash data
 (maybe with a dry run with a limited number of rows).
+
+#### Example
 
 The following example illustrates six different cases, for a datasource called `main`:
 
