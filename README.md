@@ -469,13 +469,17 @@ This value can be overriden on each datasource using the property `<datasource>.
 
 ### 2. Type Rules
 
-In any application, there are multiple ways of reading a column of a table. For example a `DECIMAL(4, 0)` could be read as a `short`, as an `int`, or even as a `long` in Java. When it comes to hashing the value it's important to use the same Java representation to do so; otherwise the same value can
-produce a different when read as an `short`, `int`, or `long`. That would defeat the purpose of the
-hash comparison.
+In any application, there are multiple ways of reading a column of a table. For example, a `DECIMAL(4, 0)` could be read in Java as a `short`, as an `int`, or even as a `long`. When it comes to hashing a value it's important to use the exact same Java representation across the board, for all related
+databases; otherwise the same value could produce a different hash if misread as a `short`, `int`,
+or `long`; this would defeat the purpose of the hash comparison.
 
-Declared rules supersede default ones. Type rules can be declared per datasource using the property `<database-type>:<java-type>`. One or more rules can be specified in the datasource as a semicolon-separated list of rules using the property `<datasource>.type.rules`. The rules are case-insensitive.
+In cases when the default java types end up being different between databases, it's possible to
+enforce them per database by using the property `<datasource>.type.rules`. Any declared rule in
+this property supersedes the default ones.
 
-You can use the command `listcolumns` to display the *effective* java type for a column before/after you declare type rules.
+One or more rules can be declared for a datasource by specifying a semicolon-separated list of rules. Also, rules are case-insensitive when typing them.
+
+You can use the command `listcolumns` to display and verify the *effective* java type for a column before/after you declare type rules.
 
 #### Available Java Types
 
