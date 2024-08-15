@@ -80,7 +80,7 @@ If data transformation needs to take place this tool can be useful to compare da
 ### 5. Identifiers That Differ Only In Letter Case Are Not Supported
 
 Since table names and column names may use a different letter case when migrating between
-databases, the matching of table and column names is dome in a case-insensitive manner. That means
+databases, the matching of table and column names is done in a case-insensitive manner. That means
 that the table `INVOICE` in one database will be successfully matched with the table `invoice` in
 another database.
 
@@ -107,7 +107,7 @@ create table "Invoice" (
 );
 ```
 
-In practice cases like these ones would be extremely rare. They are not case that we will be encounter
+In practice cases like these ones would be extremely rare. They are not cases that we will be encounter
 often -- or at all -- in business-grade databases.
 
 ## Usage
@@ -118,7 +118,9 @@ To use this tool you need:
 - Java 8 or newer installed.
 - A folder where to install the tool, the JDBC driver JAR file(s), and the configuration file.
 
-## Step 1 - Download this Tool
+To use it follow the steps:
+
+### Step 1 - Download this Tool
 
 Get the tool from Maven Central at [search results](https://central.sonatype.com/search?q=highfive) and place it in the work folder.
 
@@ -189,7 +191,7 @@ The configurable properties are:
 | `<datasource>.url`                  | The database connection URL |
 | `<datasource>.username`             | The database connection username |
 | `<datasource>.password`             | The database connection password |
-| `<datasource>.catalog`              | The catalog in the database. For SQL Server use the "database name" (such as `EN_IMG`); for PostgreSQL leave empty. This value is case-sensitive |
+| `<datasource>.catalog`              | The catalog in the database. For SQL Server use the "database name" (such as `MY_DB`); for PostgreSQL leave empty. This value is case-sensitive |
 | `<datasource>.schema`               | The schema name. This value is case-sensitive |
 | `<datasource>.table.filter`         | Optional. A list of comma-separated table names that will be included in the hash. Tables not mentioned in this list will be excluded from the hashing and validation. This value is case-insensitive |
 | `<datasource>.remove.table.prefix`  | Optional. A prefix to be removed from the table names. If your table "client" was renamed as "old_client" and you still want it to be recorded in the hash file as "client", then specify "old_" in this property. This value is case-insensitive
@@ -211,7 +213,7 @@ HighFive implements the following commands:
 | `listtables <datasource>` | Connects to the schema, list the tables in it, and checks they are all supported. Only tables and columns selected by the filters are considered. Useful to validate the connection and basic functionality |
 | `listcolumns <datasource>` | Connects to the schema, list the tables and their columns in it and verify they are all supported. Only tables and columns selected by the filters are considered |
 | `hash <datasource>` | Hashes the schema and saves the result to the file `<datasource>.hash` |
-| `verify <datasource> <baseline-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succees or fails |
+| `verify <datasource> <baseline-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
 | `copy <from-datasource> <to-datasource>` | Copies the data of the tables from a source datasource to a destination datasource. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
 
 
