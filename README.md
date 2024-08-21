@@ -210,9 +210,9 @@ HighFive implements the following commands:
 
 | Command | Description |
 | --  | -- |
-| `listtables&nbsp;<datasource>` | Connects to the schema, list the tables in it, and checks they are all supported. Only tables and columns selected by the filters are considered. Useful to validate the connection and basic functionality |
-| `listcolumns&nbsp;<datasource>` | Connects to the schema, list the tables and their columns in it and verify they are all supported. Only tables and columns selected by the filters are considered |
-| `hash&nbsp;<datasource>` | Hashes the schema and saves the result to the file `<datasource>.hash` |
+| `listtables&ensp;<datasource>` | Connects to the schema, list the tables in it, and checks they are all supported. Only tables and columns selected by the filters are considered. Useful to validate the connection and basic functionality |
+| <code>listcolumns <datasource></code>` | Connects to the schema, list the tables and their columns in it and verify they are all supported. Only tables and columns selected by the filters are considered |
+| `<pre>hash <datasource></pre>` | Hashes the schema and saves the result to the file `<datasource>.hash` |
 | `verify&nbsp;<datasource>&nbsp;<baseline-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
 | `copy&nbsp;<from-datasource>&nbsp;<to-datasource>` | Copies the data of the tables from a source datasource to a destination datasource. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
 
