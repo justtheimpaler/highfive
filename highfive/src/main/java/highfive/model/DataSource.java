@@ -21,9 +21,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.JavaTypeNotSupportedException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
@@ -32,7 +29,7 @@ import highfive.utils.Utl;
 
 public class DataSource {
 
-  private static final Logger log = LogManager.getLogger(DataSource.class);
+//  private static final Logger log = LogManager.getLogger(DataSource.class);
 
   private static final String CONFIG_FILE = "application.properties";
 
@@ -177,10 +174,6 @@ public class DataSource {
     String catalog = props.getProperty(name + ".catalog");
     String schema = readMandatory(props, name + ".schema");
     String tableFilterList = props.getProperty(name + ".table.filter");
-
-    log.info("tableFilterList=" + tableFilterList);
-    System.out.println("--- 2 ---");
-
     String removeTablePrefix = props.getProperty(name + ".remove.table.prefix");
     if (Utl.empty(removeTablePrefix)) {
       removeTablePrefix = null;
@@ -229,7 +222,6 @@ public class DataSource {
       String[] parts = tableFilterList.split(",");
       if (parts != null) {
         allowedTables = Arrays.stream(parts).map(t -> Name.lower(t.trim())).collect(Collectors.toSet());
-        log.info("::: allowedTables=" + allowedTables);
       }
     }
     TableFilter tableFilter = new TableFilter(allowedTables);
