@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import highfive.exceptions.InvalidConfigurationException;
@@ -13,6 +12,7 @@ import highfive.exceptions.UnsupportedDatabaseTypeException;
 import highfive.model.Column;
 import highfive.model.Identifier;
 import highfive.model.Table;
+import highfive.utils.Name;
 
 public class ListTablesAndCheckCommand extends DataSourceCommand {
 
@@ -35,10 +35,10 @@ public class ListTablesAndCheckCommand extends DataSourceCommand {
     for (Identifier t : tableNames) {
       info("  " + t.getGenericName());
     }
-    Set<String> na = this.ds.getTableFilter().listNotAccepted();
+    List<Name> na = this.ds.getTableFilter().listNotAccepted();
     if (!na.isEmpty()) {
       info("Tables not found (" + na.size() + "/" + filterSize + "):");
-      for (String n : na) {
+      for (Name n : na) {
         info("  " + n);
       }
     }

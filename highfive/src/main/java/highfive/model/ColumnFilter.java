@@ -3,6 +3,8 @@ package highfive.model;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import highfive.utils.Name;
+
 public class ColumnFilter implements OptionalProperty {
 
   private Set<String> allowedColumns;
@@ -12,7 +14,7 @@ public class ColumnFilter implements OptionalProperty {
     if (this.allowedColumns == null || this.allowedColumns.isEmpty()) {
       this.allowedColumns = null;
     } else {
-      this.allowedColumns = this.allowedColumns.stream().map(n -> n.toLowerCase()).collect(Collectors.toSet());
+      this.allowedColumns = this.allowedColumns.stream().map(n -> Name.lower(n)).collect(Collectors.toSet());
     }
   }
 

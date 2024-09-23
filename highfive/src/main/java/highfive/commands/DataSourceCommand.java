@@ -8,6 +8,9 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import highfive.BuildInformation;
 import highfive.exceptions.CouldNotCopyDataException;
 import highfive.exceptions.CouldNotHashException;
@@ -20,8 +23,11 @@ import highfive.model.DataSource;
 import highfive.model.Table;
 import highfive.model.TableFilter;
 import highfive.model.TableHashingOrdering;
+import highfive.utils.Name;
 
 public abstract class DataSourceCommand extends Command {
+
+  private static final Logger log = LogManager.getLogger(DataSourceCommand.class);
 
   protected DataSource ds;
 
@@ -78,7 +84,7 @@ public abstract class DataSourceCommand extends Command {
     int columnsSupported = 0;
     int columnCount = 0;
 
-    for (String na : this.ds.getTableFilter().listNotAccepted()) {
+    for (Name na : this.ds.getTableFilter().listNotAccepted()) {
       error("  - Table " + na + " not found.");
     }
 

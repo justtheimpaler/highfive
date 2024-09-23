@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import highfive.exceptions.InvalidSchemaException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
@@ -209,9 +211,15 @@ public class SQLServerDialect extends Dialect {
     return v;
   }
 
+  private static Set<String> MUST_ESCAPE = new HashSet<>();
+  static {
+    MUST_ESCAPE.add("CASE");
+    MUST_ESCAPE.add("case");
+  }
+
   @Override
   public String escapeIdentifierAsNeeded(final String canonicalName) {
-    if (canonicalName.matches("^[A-Za-z0-9_]+$")) {
+    if (canonicalName.matches("^[A-Za-z0-9_]+$") && !MUST_ESCAPE.contains(canonicalName)) {
       return canonicalName;
     } else {
       return "\"" + canonicalName.replace("\"", "\"\"").replace("'", "''") + "\"";

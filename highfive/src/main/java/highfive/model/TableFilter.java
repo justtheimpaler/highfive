@@ -1,28 +1,28 @@
 package highfive.model;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import highfive.utils.SetUtl;
+import highfive.utils.Name;
 
 public class TableFilter implements OptionalProperty {
 
-  private TreeSet<String> allowedTables;
-  private Set<String> acceptedTables;
+  private List<Name> allowedTables;
+  private List<Name> acceptedTables;
 
   public TableFilter(Set<String> allowedTables) {
     if (allowedTables == null || allowedTables.isEmpty()) {
       this.allowedTables = null;
     } else {
-      this.allowedTables = new TreeSet<>(allowedTables.stream().map(n -> n.toLowerCase()).collect(Collectors.toSet()));
+      this.allowedTables = allowedTables.stream().map(n -> Name.of(n)).collect(Collectors.toList());
     }
     this.reset();
   }
 
   public void reset() {
-    this.acceptedTables = new HashSet<>();
+    this.acceptedTables = new ArrayList<>();
   }
 
   public boolean allTablesFound() {
@@ -41,11 +41,21 @@ public class TableFilter implements OptionalProperty {
       return false;
     }
     String genericName = canonicalName.toLowerCase();
-    boolean accepted = this.allowedTables.contains(genericName);
-    if (accepted) {
-      this.acceptedTables.add(genericName);
+
+    for (Name name : this.allowedTables) {
+      if (name.isQuoted()) {
+        if (canonicalName.equals(name.getName())) {
+          this.acceptedTables.add(name);
+          return true;
+        }
+      } else {
+        if (genericName.equals(name.getName())) {
+          this.acceptedTables.add(name);
+          return true;
+        }
+      }
     }
-    return accepted;
+    return false;
   }
 
   @Override
@@ -57,18 +67,19 @@ public class TableFilter implements OptionalProperty {
     return this.allowedTables == null ? 0 : this.allowedTables.size();
   }
 
-  public Set<String> listNotAccepted() {
+  public List<Name> listNotAccepted() {
     if (this.allowedTables == null) {
-      return new HashSet<>();
+      return new ArrayList<>();
     }
-//    System.out.println("### allowed: " + this.allowedTables);
-//    System.out.println("### accepted: " + this.acceptedTables);
-//    System.out.println("### diff: " + SetUtl.difference(this.allowedTables, this.acceptedTables));
-    return new TreeSet<>(SetUtl.difference(this.allowedTables, this.acceptedTables));
+
+    List<Name> diff = new ArrayList<>(this.allowedTables);
+    diff.removeAll(this.acceptedTables);
+    return diff;
   }
 
   public String render() {
-    return this.allowedTables == null ? "" : this.allowedTables.stream().collect(Collectors.joining(","));
+    return this.allowedTables == null ? ""
+        : this.allowedTables.stream().map(n -> n.toString()).collect(Collectors.joining(","));
   }
 
 }

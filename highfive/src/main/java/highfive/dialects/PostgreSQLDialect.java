@@ -6,9 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import highfive.exceptions.InvalidSchemaException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
@@ -32,6 +37,8 @@ import highfive.serializers.OffsetDateTimeSerializer;
 import highfive.serializers.StringSerializer;
 
 public class PostgreSQLDialect extends Dialect {
+
+  private static final Logger log = LogManager.getLogger(PostgreSQLDialect.class);
 
   public PostgreSQLDialect(DataSource ds, Connection conn) {
     super(ds, conn);
@@ -225,9 +232,10 @@ public class PostgreSQLDialect extends Dialect {
         + "join pg_index i on i.indrelid = c.oid "
         + "join pg_attribute a on a.attrelid = c.oid and a.attnum = any(i.indkey) "
         + "where n.nspname = ? and c.oid = (n.nspname || '.' || ?)::regclass and i.indisprimary order by a.attnum";
+//    log.info("sql:\n"+sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, schema);
-      ps.setString(2, table.getCanonicalName());
+      ps.setString(2, table.renderSQL());
       try (ResultSet rs = ps.executeQuery();) {
         List<PKColumn> pkColumns = new ArrayList<>();
         while (rs.next()) {
@@ -266,9 +274,15 @@ public class PostgreSQLDialect extends Dialect {
     return v;
   }
 
+  private static Set<String> MUST_ESCAPE = new HashSet<>();
+  static {
+    MUST_ESCAPE.add("CASE");
+    MUST_ESCAPE.add("case");
+  }
+
   @Override
   public String escapeIdentifierAsNeeded(String canonicalName) {
-    if (canonicalName.matches("^[a-z0-9_]+$")) {
+    if (canonicalName.matches("^[a-z0-9_]+$") && !MUST_ESCAPE.contains(canonicalName)) {
       return canonicalName;
     } else {
       return "\"" + canonicalName.replace("\"", "\"\"") + "\"";

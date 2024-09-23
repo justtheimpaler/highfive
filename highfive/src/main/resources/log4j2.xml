@@ -1,0 +1,15 @@
+<Configuration status="WARN" shutdownHook="disable">
+
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} %-5p %C{1}(%L) - %m%n" />
+    </Console>
+  </Appenders>
+
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="Console" />
+    </Root>
+  </Loggers>
+
+</Configuration>

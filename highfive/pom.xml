@@ -51,9 +51,21 @@
     <maven.compiler.target>8</maven.compiler.target>
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
+    <log4j.version>2.24.0</log4j.version>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
 
   </dependencies>
 
@@ -78,6 +90,35 @@
 
     <plugins>
 
+      <!-- Assemble jar with dependencies -->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.6.0</version><!--$NO-MVN-MAN-VER$-->
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>highfive.HighFive</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <finalName>highfive-${project.version}</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>    
+
       <!-- Embeds the project build information -->
 
       <plugin>
@@ -92,22 +133,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-
-      <!-- Specified the main class -->
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.2</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>highfive.HighFive</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
       </plugin>
 
     </plugins>
@@ -138,6 +163,8 @@
       <build>
 
         <plugins>
+        
+        
 
           <!-- Set the release tag to the version number only, and single versioning -->
 

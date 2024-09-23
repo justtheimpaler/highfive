@@ -45,9 +45,9 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     this.hashFile = new HashFile();
 
     if (!this.ds.getTableFilter().allTablesFound()) {
-      throw new CouldNotHashException(
-          "Could not find the following tables declared in the property '" + this.ds.getName() + ".table.filter': "
-              + this.ds.getTableFilter().listNotAccepted().stream().collect(Collectors.joining(", ")));
+      throw new CouldNotHashException("Could not find the following tables declared in the property '"
+          + this.ds.getName() + ".table.filter': " + this.ds.getTableFilter().listNotAccepted().stream()
+              .map(n -> n.toString()).collect(Collectors.joining(", ")));
 
     }
 
