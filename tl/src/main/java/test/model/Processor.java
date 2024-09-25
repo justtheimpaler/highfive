@@ -1,4 +1,4 @@
-package tl.model;
+package test.model;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

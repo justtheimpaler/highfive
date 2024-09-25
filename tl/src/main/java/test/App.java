@@ -1,22 +1,22 @@
-package tl;
+package test;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import tl.jul.JULCustomFormatter;
-import tl.model.Processor;
+import test.jul.JULCustomFormatter;
+import test.model.Processor;
 
-public class TestJUL {
+public class App {
 
-  private static final Logger log = Logger.getLogger(TestJUL.class.getName());
+  private static final Logger log = Logger.getLogger(App.class.getName());
 
   static {
-    JULCustomFormatter.initialize(Level.FINEST);
+    JULCustomFormatter.initialize(Level.INFO);
   }
 
   public static void main(final String[] args) {
     log.info("Starting processing");
-    TestJUL j = new TestJUL();
+    App j = new App();
     j.compute1();
 
     new Processor().calc();

@@ -1,4 +1,4 @@
-package tl.jul;
+package test.jul;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class JULCustomFormatter extends Formatter {
 
-  private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("uuuu-MM-dd hh:mm:ss");
+  private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("uuuu-MM-dd hh:mm:ss.SSS");
 
   public static void initialize(Level level) {
     var root = Logger.getLogger("");
