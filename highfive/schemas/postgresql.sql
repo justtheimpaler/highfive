@@ -30,6 +30,18 @@ create unique index ixt1 on t1.w (c, b, (a*2+b) desc);
 
 create unique index ix2t1 on t1.w (b, c desc, a);
 
+create table t1."CASE" (
+  region int not null,
+  sector int,
+  name varchar(20),
+  unique (region, sector)
+);
+
+insert into t1."CASE" (region, sector, name) values (123, 456, 'Chicago');
+insert into t1."CASE" (region, sector, name) values (140, 70, 'LA');
+insert into t1."CASE" (region, sector, name) values (140, 71, 'Denver');
+
+
 -- no non-unique
 -- no collations
 -- no nulls first/last

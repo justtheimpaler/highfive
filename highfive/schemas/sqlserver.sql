@@ -40,3 +40,13 @@ insert into data (id, i, n1, n2, d, dt, c, v) values
   (2, null,     null,      null,               null,         null,                  null, null),
   (3, -12345678, -123456.78, -123456789012345678, '1960-08-14', '2024-08-15 12:34:56', 'a''b', 'Text with " and '' and <''> </> <\> too.');
   
+create table "CASE" (
+  region int not null,
+  sector int,
+  name varchar(20),
+  unique (region, sector)
+);
+
+insert into "CASE" (region, sector, name) values (123, 456, 'Chicago');
+insert into "CASE" (region, sector, name) values (140, 70, 'LA');
+insert into "CASE" (region, sector, name) values (140, 71, 'Denver');
