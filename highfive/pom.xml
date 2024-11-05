@@ -3,7 +3,7 @@
 
   <groupId>org.nocrala</groupId>
   <artifactId>highfive</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>HighFive - Database Data Copier &amp; Comparator</name>
@@ -72,7 +72,7 @@
   <scm>
     <developerConnection>scm:git:ssh://git@bitbucket.org/impalerthe/highfive.git</developerConnection>
     <url>https://bitbucket.org/impalerthe/highfive.git</url>
-    <tag>highfive-1.2.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
