@@ -228,11 +228,14 @@ public class PostgreSQLDialect extends Dialect {
   }
 
   private List<PKColumn> getPrimaryKeyColumns(Connection conn, String schema, Identifier table) throws SQLException {
-    String sql = "select a.attname, a.attnum " + "from pg_namespace n " + "join pg_class c on c.relnamespace = n.oid "
-        + "join pg_index i on i.indrelid = c.oid "
-        + "join pg_attribute a on a.attrelid = c.oid and a.attnum = any(i.indkey) "
-        + "where n.nspname = ? and c.oid = (n.nspname || '.' || ?)::regclass and i.indisprimary order by a.attnum";
-//    log.info("sql:\n"+sql);
+    String sql = "select a.attname, array_position(i.indkey, a.attnum) + 1 as pos " //
+        + "from pg_namespace n " //
+        + "join pg_class c on c.relnamespace = n.oid " //
+        + "join pg_index i on i.indrelid = c.oid " //
+        + "join pg_attribute a on a.attrelid = c.oid and a.attnum = any(i.indkey) " //
+        + "where n.nspname = ? and c.oid = (n.nspname || '.' || ?)::regclass and i.indisprimary " //
+        + "order by pos";
+    log.info("sql:\n" + sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, schema);
       ps.setString(2, table.renderSQL());
