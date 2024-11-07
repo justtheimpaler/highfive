@@ -16,6 +16,9 @@ public class Utl {
   }
 
   public static String toHex(final byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
     char[] result = new char[bytes.length * 2];
     for (int j = 0; j < bytes.length; j++) {
       int v = bytes[j] & 0xFF;

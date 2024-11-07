@@ -10,10 +10,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import highfive.dialects.PostgreSQLDialect;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -30,8 +26,6 @@ import highfive.model.TableHashingOrdering;
 import highfive.utils.Utl;
 
 public abstract class GenericHashCommand extends DataSourceCommand {
-
-  private static final Logger log = LogManager.getLogger(GenericHashCommand.class);
 
   protected HashFile hashFile;
 
@@ -95,7 +89,9 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       String tid = this.ds.getDialect().renderSQLTableIdentifier(tn);
       String sql = "select" + this.ds.getDialect().renderHeadLimit(ds.getMaxRows()) + " " + names + " from " + tid
           + " order by " + selectOrdering + this.ds.getDialect().renderTailLimit(ds.getMaxRows());
-//      info("  sql: " + sql);
+      if (this.ds.getLogSQL()) {
+        info("    * sql: " + sql);
+      }
       Hasher h = new Hasher();
 
       this.ds.getConnection().setAutoCommit(this.ds.getSelectAutoCommit());
@@ -109,11 +105,15 @@ public abstract class GenericHashCommand extends DataSourceCommand {
         while (rs.next()) {
           int col = 1;
           byte[] bytes = null;
+          boolean first = true;
           for (Column c : t.getColumns()) {
             try {
               bytes = c.getSerializer().read(rs, col++);
               if (this.ds.getLogHashingValues()) {
-                log.info(" * Read value: '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes));
+                String bullet = first ? "*" : " ";
+                first = false;
+                info("    " + bullet + " " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: "
+                    + Utl.toHex(bytes));
               }
             } catch (SQLException e) {
               error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"

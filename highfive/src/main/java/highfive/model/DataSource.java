@@ -50,6 +50,7 @@ public class DataSource {
   private TypeSolver solver;
   private Long maxRows;
   private boolean logHashingValues;
+  private boolean logSQL;
   private long insertBatchSize;
   private LinkedHashMap<String, TableHashingOrdering> hashingOrderings;
 
@@ -64,7 +65,7 @@ public class DataSource {
   public DataSource(String name, String driverJAR, String driverClass, String url, String username, String password,
       String catalog, String schema, String removeTablePrefix, final Boolean declaredSelectAutoCommit,
       final boolean readOnly, TableFilter tableFilter, ColumnFilter columnFilter, Long maxRows,
-      boolean logHashingValues, long insertBatchSize, TypeSolver solver,
+      boolean logHashingValues, boolean logSQL, long insertBatchSize, TypeSolver solver,
       LinkedHashMap<String, TableHashingOrdering> hashingOrderings)
       throws SQLException, UnsupportedDatabaseTypeException {
     this.name = name;
@@ -81,6 +82,7 @@ public class DataSource {
     this.columnFilter = columnFilter;
     this.maxRows = maxRows;
     this.logHashingValues = logHashingValues;
+    this.logSQL = logSQL;
     this.insertBatchSize = insertBatchSize;
     this.solver = solver;
     this.hashingOrderings = hashingOrderings;
@@ -184,6 +186,7 @@ public class DataSource {
     String columnFilterList = props.getProperty(name + ".column.filter");
     String sMaxRows = props.getProperty(name + ".max.rows");
     String sLogHashingValues = props.getProperty(name + ".log.hashing.values");
+    String sLogSQL = props.getProperty(name + ".log.sql");
     String sInsertBatchSize = props.getProperty(name + ".insert.batch.size");
     String typeRules = props.getProperty(name + ".type.rules");
 
@@ -258,7 +261,6 @@ public class DataSource {
     // Log Hashing Values
 
     boolean logHashingValues = false;
-//    log.info("sLogHashingValues=" + sLogHashingValues);
     if (Utl.empty(sLogHashingValues)) {
       // leave default value
     } else if ("false".equals(sLogHashingValues)) {
@@ -267,6 +269,20 @@ public class DataSource {
       logHashingValues = true;
     } else {
       throw new InvalidConfigurationException("If the property '" + name + ".log.hashing.values"
+          + "' is specified it must be either 'true' or 'false', but found '" + sReadOnly + "'.");
+    }
+
+    // Log SQL
+
+    boolean logSQL = false;
+    if (Utl.empty(sLogSQL)) {
+      // leave default value
+    } else if ("false".equals(sLogSQL)) {
+      logSQL = false;
+    } else if ("true".equals(sLogSQL)) {
+      logSQL = true;
+    } else {
+      throw new InvalidConfigurationException("If the property '" + name + ".log.sql"
           + "' is specified it must be either 'true' or 'false', but found '" + sReadOnly + "'.");
     }
 
@@ -350,8 +366,8 @@ public class DataSource {
     }
 
     return new DataSource(name, driverJAR, driverClass, url, username, password, catalog, schema, removeTablePrefix,
-        declaredSelectAutoCommit, readOnly, tableFilter, columnFilter, maxRows, logHashingValues, insertBatchSize,
-        solver, hashingOrderings);
+        declaredSelectAutoCommit, readOnly, tableFilter, columnFilter, maxRows, logHashingValues, logSQL,
+        insertBatchSize, solver, hashingOrderings);
 
   }
 
@@ -443,8 +459,12 @@ public class DataSource {
     if (this.maxRows != null) {
       info("  max rows to read: " + this.maxRows);
     }
-    info("  log hashing values: " + this.logHashingValues);
-
+    if (this.logHashingValues) {
+      info("  log hashing values: " + this.logHashingValues);
+    }
+    if (this.logSQL) {
+      info("  log SQL: " + this.logSQL);
+    }
     if (forInserting) {
       info("  insert batch size: " + this.insertBatchSize);
     }
@@ -503,6 +523,10 @@ public class DataSource {
 
   public boolean getLogHashingValues() {
     return logHashingValues;
+  }
+
+  public boolean getLogSQL() {
+    return logSQL;
   }
 
   public long getInsertBatchSize() {
