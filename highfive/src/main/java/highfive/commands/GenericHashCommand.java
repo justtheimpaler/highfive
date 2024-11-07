@@ -10,6 +10,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import highfive.dialects.PostgreSQLDialect;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -26,6 +30,8 @@ import highfive.model.TableHashingOrdering;
 import highfive.utils.Utl;
 
 public abstract class GenericHashCommand extends DataSourceCommand {
+
+  private static final Logger log = LogManager.getLogger(GenericHashCommand.class);
 
   protected HashFile hashFile;
 
@@ -106,6 +112,9 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           for (Column c : t.getColumns()) {
             try {
               bytes = c.getSerializer().read(rs, col++);
+              if (this.ds.getLogHashingValues()) {
+                log.info(" * Read value: '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes));
+              }
             } catch (SQLException e) {
               error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
                   + tn.getCanonicalName() + "' as a '" + c.getSerializer().getName()

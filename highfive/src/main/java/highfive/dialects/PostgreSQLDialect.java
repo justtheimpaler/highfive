@@ -301,7 +301,7 @@ public class PostgreSQLDialect extends Dialect {
 
   @Override
   public String renderTailLimit(Long limit) {
-    return limit == null ? "" : ("limit " + limit);
+    return limit == null ? "" : (" limit " + limit);
   }
 
   @Override
