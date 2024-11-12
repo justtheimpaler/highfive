@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
 
 import highfive.commands.Command;
 import highfive.commands.CopyCommand;
@@ -15,8 +16,13 @@ import highfive.commands.VerifyCommand;
 import highfive.exceptions.ApplicationException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
+import highfive.utils.JULCustomFormatter;
 
 public class HighFive {
+
+  static {
+    JULCustomFormatter.initialize(Level.INFO);
+  }
 
   public static void main(final String[] args) {
 

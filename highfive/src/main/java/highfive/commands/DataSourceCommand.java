@@ -7,9 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Logger;
 
 import highfive.BuildInformation;
 import highfive.exceptions.CouldNotCopyDataException;
@@ -27,7 +25,7 @@ import highfive.utils.Name;
 
 public abstract class DataSourceCommand extends Command {
 
-  private static final Logger log = LogManager.getLogger(DataSourceCommand.class);
+  private static final Logger log = Logger.getLogger(DataSourceCommand.class.getName());
 
   protected DataSource ds;
 

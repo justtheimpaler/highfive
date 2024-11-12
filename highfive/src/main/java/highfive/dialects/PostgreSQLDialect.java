@@ -10,10 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import highfive.exceptions.InvalidSchemaException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
@@ -38,7 +36,7 @@ import highfive.serializers.StringSerializer;
 
 public class PostgreSQLDialect extends Dialect {
 
-  private static final Logger log = LogManager.getLogger(PostgreSQLDialect.class);
+  private static final Logger log = Logger.getLogger(PostgreSQLDialect.class.getName());
 
   public PostgreSQLDialect(DataSource ds, Connection conn) {
     super(ds, conn);
@@ -235,7 +233,7 @@ public class PostgreSQLDialect extends Dialect {
         + "join pg_attribute a on a.attrelid = c.oid and a.attnum = any(i.indkey) " //
         + "where n.nspname = ? and c.oid = (n.nspname || '.' || ?)::regclass and i.indisprimary " //
         + "order by pos";
-    log.info("sql:\n" + sql);
+//    log.info("sql:\n" + sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, schema);
       ps.setString(2, table.renderSQL());
