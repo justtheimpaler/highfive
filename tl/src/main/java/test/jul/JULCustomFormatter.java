@@ -1,26 +1,53 @@
 package test.jul;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import test.model.Processor;
 
 public class JULCustomFormatter extends Formatter {
 
   private static final SimpleDateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-  public static void initialize(Level level) {
+  public static void initialize() {
+
+    try {
+      LogManager.getLogManager().readConfiguration(new FileInputStream("application.properties"));
+      System.out.println(">> config file found.");
+    } catch (FileNotFoundException e) {
+      // Ignore
+      System.out.println(">> config file not found.");
+    } catch (SecurityException | IOException e1) {
+      e1.printStackTrace();
+    }
+
     Logger root = Logger.getLogger("");
-    root.setLevel(level);
+    System.out.println(">> root.getLevel()=" + root.getLevel());
+//    root.setLevel(level);
     JULCustomFormatter f = new JULCustomFormatter();
     for (Handler handler : root.getHandlers()) {
       handler.setFormatter(f);
-      handler.setLevel(level);
+      System.out.println(">> handler.getLevel()=" + handler.getLevel());
+//      handler.setLevel(level);
     }
+  }
+
+  public static void setLevels() {
+    LogManager lm = LogManager.getLogManager();
+    String name = Processor.class.getName();
+//    System.out.println(">>> name=" + name);
+//    Logger l1 = lm.getLogger(name);
+//    l1.setLevel(Level.FINER);
   }
 
   @Override
