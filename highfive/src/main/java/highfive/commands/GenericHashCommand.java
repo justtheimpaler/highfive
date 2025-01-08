@@ -96,55 +96,60 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
       this.ds.getConnection().setAutoCommit(this.ds.getSelectAutoCommit());
 
-      try (
-          PreparedStatement ps = this.ds.getConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
-              ResultSet.CONCUR_READ_ONLY);
-          ResultSet rs = ps.executeQuery();) {
-        int logCount = 0;
-        int rowsCount = 0;
-        while (rs.next()) {
-          int col = 1;
-          byte[] bytes = null;
-          boolean first = true;
-          for (Column c : t.getColumns()) {
-            try {
-              bytes = c.getSerializer().read(rs, col++);
-              if (this.ds.getLogHashingValues()) {
-                String bullet = first ? "*" : " ";
-                first = false;
-                info("    " + bullet + " " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: "
-                    + Utl.toHex(bytes));
-              }
-            } catch (SQLException e) {
-              error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
-                  + tn.getCanonicalName() + "' as a '" + c.getSerializer().getName()
-                  + "' value. The error happened in row #" + DF.format(rowsCount + 1)
-                  + " when the table is sorted by the columns: " + selectOrdering + ".");
-              throw e;
-            } catch (RuntimeException e) {
-              error("Could not serialize the value for column '" + c.getCanonicalName() + "' on table '"
-                  + tn.getCanonicalName() + "'. The error happened in row #" + DF.format(rowsCount + 1)
-                  + " when the table is sorted by the columns: " + selectOrdering + ". Is '"
-                  + c.getSerializer().getClass().getSimpleName() + "' the correct serializer for this column?");
-              throw e;
-            }
-            h.apply(bytes);
-          }
-          logCount++;
-          rowsCount++;
-          if (logCount >= 100000) {
-            info("    " + DF.format(rowsCount) + " rows read");
-            logCount = 0;
-          }
-          if (ds.getMaxRows() != null && rowsCount >= ds.getMaxRows()) {
-            info("    - Limit of " + ds.getMaxRows()
-                + " rows (max.rows) reached when reading this table -- moving on to the next table.");
-            break;
-          }
+      try (PreparedStatement ps = this.ds.getConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
+          ResultSet.CONCUR_READ_ONLY);) {
+
+        if (this.ds.getSelectFetchSize() != null) {
+          ps.setFetchSize(this.ds.getSelectFetchSize());
         }
-        byte[] tableHash = h.close();
-        hashFile.add(Utl.toHex(tableHash), tn.getGenericName());
-        info("    " + DF.format(rowsCount) + " row(s) read");
+
+        try (ResultSet rs = ps.executeQuery();) {
+          int logCount = 0;
+          int rowsCount = 0;
+          while (rs.next()) {
+            int col = 1;
+            byte[] bytes = null;
+            boolean first = true;
+            for (Column c : t.getColumns()) {
+              try {
+                bytes = c.getSerializer().read(rs, col++);
+                if (this.ds.getLogHashingValues()) {
+                  String bullet = first ? "*" : " ";
+                  first = false;
+                  info("    " + bullet + " " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: "
+                      + Utl.toHex(bytes));
+                }
+              } catch (SQLException e) {
+                error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
+                    + tn.getCanonicalName() + "' as a '" + c.getSerializer().getName()
+                    + "' value. The error happened in row #" + DF.format(rowsCount + 1)
+                    + " when the table is sorted by the columns: " + selectOrdering + ".");
+                throw e;
+              } catch (RuntimeException e) {
+                error("Could not serialize the value for column '" + c.getCanonicalName() + "' on table '"
+                    + tn.getCanonicalName() + "'. The error happened in row #" + DF.format(rowsCount + 1)
+                    + " when the table is sorted by the columns: " + selectOrdering + ". Is '"
+                    + c.getSerializer().getClass().getSimpleName() + "' the correct serializer for this column?");
+                throw e;
+              }
+              h.apply(bytes);
+            }
+            logCount++;
+            rowsCount++;
+            if (logCount >= 100000) {
+              info("    " + DF.format(rowsCount) + " rows read");
+              logCount = 0;
+            }
+            if (ds.getMaxRows() != null && rowsCount >= ds.getMaxRows()) {
+              info("    - Limit of " + ds.getMaxRows()
+                  + " rows (max.rows) reached when reading this table -- moving on to the next table.");
+              break;
+            }
+          }
+          byte[] tableHash = h.close();
+          hashFile.add(Utl.toHex(tableHash), tn.getGenericName());
+          info("    " + DF.format(rowsCount) + " row(s) read");
+        }
       }
 
     }

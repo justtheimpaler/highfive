@@ -36,6 +36,7 @@ import highfive.serializers.StringSerializer;
 
 public class PostgreSQLDialect extends Dialect {
 
+  @SuppressWarnings("unused")
   private static final Logger log = Logger.getLogger(PostgreSQLDialect.class.getName());
 
   public PostgreSQLDialect(DataSource ds, Connection conn) {

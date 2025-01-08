@@ -25,6 +25,7 @@ import highfive.utils.Name;
 
 public abstract class DataSourceCommand extends Command {
 
+  @SuppressWarnings("unused")
   private static final Logger log = Logger.getLogger(DataSourceCommand.class.getName());
 
   protected DataSource ds;

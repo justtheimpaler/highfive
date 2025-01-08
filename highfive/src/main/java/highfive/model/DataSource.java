@@ -44,6 +44,7 @@ public class DataSource {
   private String removeTablePrefix;
 
   private boolean selectAutoCommit;
+  private Integer selectFetchSize;
   private boolean readOnly;
   private TableFilter tableFilter;
   private ColumnFilter columnFilter;
@@ -64,7 +65,7 @@ public class DataSource {
 
   public DataSource(String name, String driverJAR, String driverClass, String url, String username, String password,
       String catalog, String schema, String removeTablePrefix, final Boolean declaredSelectAutoCommit,
-      final boolean readOnly, TableFilter tableFilter, ColumnFilter columnFilter, Long maxRows,
+      Integer selectFetchSize, final boolean readOnly, TableFilter tableFilter, ColumnFilter columnFilter, Long maxRows,
       boolean logHashingValues, boolean logSQL, long insertBatchSize, TypeSolver solver,
       LinkedHashMap<String, TableHashingOrdering> hashingOrderings)
       throws SQLException, UnsupportedDatabaseTypeException {
@@ -86,6 +87,7 @@ public class DataSource {
     this.insertBatchSize = insertBatchSize;
     this.solver = solver;
     this.hashingOrderings = hashingOrderings;
+    this.selectFetchSize = selectFetchSize;
 
     this.hashFileName = name + ".hash";
 
@@ -203,6 +205,23 @@ public class DataSource {
     } else {
       throw new InvalidConfigurationException("If the property '" + name + ".select.autocommit"
           + "' is specified it must be either 'true' or 'false', but found '" + sDeclaredAutoCommit + "'.");
+    }
+
+    // SELECT Fetch Size
+
+    String sSelectFetchSize = props.getProperty(name + ".select.fetch.size");
+    Integer selectFetchSize = null;
+    if (sSelectFetchSize != null && !sSelectFetchSize.trim().isEmpty()) {
+      try {
+        selectFetchSize = Integer.parseInt(sSelectFetchSize);
+        if (selectFetchSize < 1) {
+          throw new InvalidConfigurationException("If the property '" + name + ".select.fetch.size"
+              + "' is specified, if must be a number greater than zero, but found '" + sSelectFetchSize + "'.");
+        }
+      } catch (NumberFormatException e) {
+        throw new InvalidConfigurationException("If the property '" + name + ".select.fetch.size"
+            + "' is specified, if must be a number greater than zero, but found '" + sSelectFetchSize + "'.");
+      }
     }
 
     // Readonly
@@ -366,8 +385,8 @@ public class DataSource {
     }
 
     return new DataSource(name, driverJAR, driverClass, url, username, password, catalog, schema, removeTablePrefix,
-        declaredSelectAutoCommit, readOnly, tableFilter, columnFilter, maxRows, logHashingValues, logSQL,
-        insertBatchSize, solver, hashingOrderings);
+        declaredSelectAutoCommit, selectFetchSize, readOnly, tableFilter, columnFilter, maxRows, logHashingValues,
+        logSQL, insertBatchSize, solver, hashingOrderings);
 
   }
 
@@ -547,6 +566,10 @@ public class DataSource {
 
   public boolean getSelectAutoCommit() {
     return selectAutoCommit;
+  }
+
+  public Integer getSelectFetchSize() {
+    return selectFetchSize;
   }
 
   public boolean getReadOnly() {
