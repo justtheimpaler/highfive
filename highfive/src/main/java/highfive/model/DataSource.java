@@ -487,6 +487,8 @@ public class DataSource {
     if (forInserting) {
       info("  insert batch size: " + this.insertBatchSize);
     }
+    info("  select autocommit: " + this.selectAutoCommit);
+    info("  select fetch size: " + (this.selectFetchSize == null ? "--" : "" + this.selectFetchSize));
 
   }
 
