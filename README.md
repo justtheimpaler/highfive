@@ -2,7 +2,7 @@
 
 HighFive helps with migrating data from one database to another, especially when these databases are of different vendors.
 
-The main functionality of HighFive is to **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa). HighFive comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for the data verification. Also, third-party tools that specialize in this scenarios can be expensive to use. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
+The main functionality of HighFive is to **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa). HighFive comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for data copying or verification. Third-party tools that specialize in this scenarios can have high licensing costs. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
 
 Additionally, HighFive can also **compare the data between two (or more) databases**. This is particularly useful to verify the data was copied correctly to a destination database (by this tool or by another one). It performs this comparison by computing hash values for each table in one database (the "baseline database") and then by computing again the hash values in the other database(s). If the data was copied correctly these hashes will fully match. The implemented strategy considers computing the hash values of all the data in both schemas using the SHA-256 algorithm. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
 
@@ -24,29 +24,24 @@ This tool currently supports the following databases:
 
 ### 2. The Tables Must Be Sortable
 
+For data verification purposes the tables must be sortable. This is not required for the data copy.
+
 Since hashing functions require ordered data sets, the ordering of rows is significant. This
 means that the rows in both the source and destination databases must be hashed in the exact
 same ordering.
 
-To ensure a deterministic and stable ordering HighFive automatically detects the primary keys of the tables and
-uses them for sorting by default.
+To ensure a deterministic and stable ordering HighFive can use:
 
-If a table does not have a primary key it can still be hashed by declaring a sorting row ordering
-for hashing using the property `<datasource>.hashing.ordering`. Ideally this sorting order should
-produce no duplicate rows (for the ordering columns), so a unique constraint or unique index are
-ideal for this purpose. If a hashing ordering is explicitly declared for a table, the primary key
-is ignored and this hashing ordering takes precedence over it.
+1. It automatically detects the **primary keys** of the tables and uses them by default for sorting purposes.
+2. If a table does not have a primary key it can still be hashed by **declaring a list of columns** for sorting using the property `<datasource>.hashing.ordering`. Ideally this sorting order should
+produce no duplicate rows (for the ordering columns), so a non-nullable unique constraint or unique index are ideal for this purpose. If a hashing ordering is explicitly declared for a table, the primary key is ignored and this hashing ordering is used.
+3. As an option of last resort, **all the table columns** could also be used for ordering. This can work as long as all the columns of the table are actually sortable. However, this may prove to be impractical or unrealistic due to database resource constraints, particularly if the table has a massive number of rows (the engine may run out of resources while sorting) and/or has many heavy columns (it could take a very long time to sort data).
 
-As an option of last resort, the full list of table columns could also be used for ordering, if
-all the columns of the table are sortable. This may prove to be impractical or unrealistic due
-to database resource constraints, particularly if the table has a massive number of rows and/or
-has many heavy columns.
-
-If none of the hashing ordering are practical, then the table can be excluded from HighFive using
+Finally, if none of the hashing ordering are practical, then the table can be excluded from HighFive using
 the property `<datasource>.table.filter`. In this case, this table would fall outside the scope
 of this tool and would need to be verified in a different way.
 
-See the section **Hashing Ordering** for detail on how to declare specific orderings.
+See the section **Hashing Ordering** for details on how to declare specific orderings.
 
 ### 3. Supported Data Types
 
@@ -209,7 +204,7 @@ HighFive implements the following commands:
 | <code>listcolumns <datasource></code> | Connects to the schema, list the tables and their columns in it and verify they are all supported. Only tables and columns selected by the filters are considered |
 | <code>hash <datasource></code> | Hashes the schema and saves the result to the file `<datasource>.hash` |
 | <code>verify <datasource> <baseline-file></code> | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
-| <code>copy <from-datasource> <to-datasource></code> | Copies the data of the tables from a source datasource to a destination datasource. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
+| <code>copy <from-datasource> <to-datasource></code> | Copies the data of the tables from a source datasource to a destination datasource. The destination tables must be empty. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
 
 
 ## Examples
