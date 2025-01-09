@@ -210,17 +210,22 @@ public class DataSource {
     // SELECT Fetch Size
 
     String sSelectFetchSize = props.getProperty(name + ".select.fetch.size");
-    Integer selectFetchSize = null;
-    if (sSelectFetchSize != null && !sSelectFetchSize.trim().isEmpty()) {
+    Integer selectFetchSize;
+    if (sSelectFetchSize == null) { // Not specified, defaults to 100
+      selectFetchSize = 100;
+    } else if (sSelectFetchSize.trim().isEmpty()) { // Specified as empty, no fetch size
+      selectFetchSize = null;
+    } else { // A value was specified
       try {
         selectFetchSize = Integer.parseInt(sSelectFetchSize);
         if (selectFetchSize < 1) {
           throw new InvalidConfigurationException("If the property '" + name + ".select.fetch.size"
-              + "' is specified, if must be a number greater than zero, but found '" + sSelectFetchSize + "'.");
+              + "' is specified, if must be an integer number greater than zero, but found '" + sSelectFetchSize
+              + "'.");
         }
       } catch (NumberFormatException e) {
         throw new InvalidConfigurationException("If the property '" + name + ".select.fetch.size"
-            + "' is specified, if must be a number greater than zero, but found '" + sSelectFetchSize + "'.");
+            + "' is specified, if must be an integer number greater than zero, but found '" + sSelectFetchSize + "'.");
       }
     }
 

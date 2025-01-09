@@ -147,7 +147,7 @@ public class CopyCommand extends DualDataSourceCommand {
 
     }
 
-    // check
+    // 3. Check that all validations passed
 
     if (!errors.isEmpty()) {
       errors.stream().forEach(e -> error("  - " + e));
@@ -187,89 +187,95 @@ public class CopyCommand extends DualDataSourceCommand {
 
       this.ds.getConnection().setAutoCommit(this.ds.getSelectAutoCommit());
 
-      try (
-          PreparedStatement selectPS = this.ds.getConnection().prepareStatement(select, ResultSet.TYPE_FORWARD_ONLY,
-              ResultSet.CONCUR_READ_ONLY);
-          PreparedStatement insertPS = this.ds2.getConnection().prepareStatement(insert, ResultSet.TYPE_FORWARD_ONLY,
-              ResultSet.CONCUR_READ_ONLY);
-          ResultSet rs = selectPS.executeQuery();) {
-        int logCount = 0;
-        long currentBatch = 0;
-        int rowsCount = 0;
-        while (rs.next()) {
-          int col = 1;
-          for (ColumnPair cp : pair.columns) {
-            Column c = cp.source;
-            try {
-              c.getSerializer().read(rs, col);
-            } catch (SQLException e) {
-              error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
-                  + pair.source.getCanonicalName() + "' as a '" + c.getSerializer().getName()
-                  + "' value. The error happened in row #" + (DF.format(rowsCount) + 1)
-                  + " when the table is sorted by the primary key (" + pkNames + ").");
-              throw e;
-            } catch (RuntimeException e) {
-              error("Could not serialize the value for column '" + c.getCanonicalName() + "' on table '"
-                  + pair.source.getCanonicalName() + "'. The error happened in row #" + (DF.format(rowsCount) + 1)
-                  + " when the table is sorted by the primary key (" + pkNames + "). Is '"
-                  + c.getSerializer().getClass().getSimpleName() + "' the correct serializer for this column?");
-              throw e;
-            }
+      try (PreparedStatement selectPS = this.ds.getConnection().prepareStatement(select, ResultSet.TYPE_FORWARD_ONLY,
+          ResultSet.CONCUR_READ_ONLY);) {
 
-            c.getSerializer().set(insertPS, col);
-
-            col++;
-          }
-
-          insertPS.addBatch();
-          currentBatch++;
-          if (currentBatch >= this.ds2.getInsertBatchSize()) {
-            insertPS.executeBatch();
-            currentBatch = 0;
-          }
-
-          logCount++;
-          rowsCount++;
-          if (logCount >= 50000) {
-            info("  " + DF.format(rowsCount) + " rows copied");
-            logCount = 0;
-          }
-          if (ds2.getMaxRows() != null && rowsCount >= ds2.getMaxRows()) {
-            info("  - Limit of " + DF.format(ds2.getMaxRows())
-                + " rows (max.rows) reached when copying this table -- moving on to the next table.");
-            break;
-          }
+        if (this.ds.getSelectFetchSize() != null) {
+          selectPS.setFetchSize(this.ds.getSelectFetchSize());
         }
 
-        if (currentBatch > 0) {
-          try {
-            insertPS.executeBatch();
-          } catch (SQLException e) {
-            error("Could not copy data to table '" + pair.dest.getCanonicalName() + "'.");
-            error("-- SQL insert statement: " + insert);
-            SQLException oe = e;
-            int cnt = 0;
-            e = e.getNextException();
-            while (e != null) {
-              cnt++;
-              if (cnt <= MAX_BATCH_EXCEPTIONS_TO_DISPLAY) {
-                e.printStackTrace();
-                e = e.getNextException();
-              } else {
-                e = null;
+        try (
+            PreparedStatement insertPS = this.ds2.getConnection().prepareStatement(insert, ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = selectPS.executeQuery();) {
+          int logCount = 0;
+          long currentBatch = 0;
+          int rowsCount = 0;
+          while (rs.next()) {
+            int col = 1;
+            for (ColumnPair cp : pair.columns) {
+              Column c = cp.source;
+              try {
+                c.getSerializer().read(rs, col);
+              } catch (SQLException e) {
+                error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
+                    + pair.source.getCanonicalName() + "' as a '" + c.getSerializer().getName()
+                    + "' value. The error happened in row #" + (DF.format(rowsCount) + 1)
+                    + " when the table is sorted by the primary key (" + pkNames + ").");
+                throw e;
+              } catch (RuntimeException e) {
+                error("Could not serialize the value for column '" + c.getCanonicalName() + "' on table '"
+                    + pair.source.getCanonicalName() + "'. The error happened in row #" + (DF.format(rowsCount) + 1)
+                    + " when the table is sorted by the primary key (" + pkNames + "). Is '"
+                    + c.getSerializer().getClass().getSimpleName() + "' the correct serializer for this column?");
+                throw e;
               }
+
+              c.getSerializer().set(insertPS, col);
+
+              col++;
             }
-            if (cnt > MAX_BATCH_EXCEPTIONS_TO_DISPLAY) {
-              info("-- Abridged: showing only the first " + MAX_BATCH_EXCEPTIONS_TO_DISPLAY
-                  + " exception(s) of the batch insert.");
+
+            insertPS.addBatch();
+            currentBatch++;
+            if (currentBatch >= this.ds2.getInsertBatchSize()) {
+              insertPS.executeBatch();
+              currentBatch = 0;
             }
-            throw oe;
+
+            logCount++;
+            rowsCount++;
+            if (logCount >= 50000) {
+              info("  " + DF.format(rowsCount) + " rows copied");
+              logCount = 0;
+            }
+            if (ds2.getMaxRows() != null && rowsCount >= ds2.getMaxRows()) {
+              info("  - Limit of " + DF.format(ds2.getMaxRows())
+                  + " rows (max.rows) reached when copying this table -- moving on to the next table.");
+              break;
+            }
           }
+
+          if (currentBatch > 0) {
+            try {
+              insertPS.executeBatch();
+            } catch (SQLException e) {
+              error("Could not copy data to table '" + pair.dest.getCanonicalName() + "'.");
+              error("-- SQL insert statement: " + insert);
+              SQLException oe = e;
+              int cnt = 0;
+              e = e.getNextException();
+              while (e != null) {
+                cnt++;
+                if (cnt <= MAX_BATCH_EXCEPTIONS_TO_DISPLAY) {
+                  e.printStackTrace();
+                  e = e.getNextException();
+                } else {
+                  e = null;
+                }
+              }
+              if (cnt > MAX_BATCH_EXCEPTIONS_TO_DISPLAY) {
+                info("-- Abridged: showing only the first " + MAX_BATCH_EXCEPTIONS_TO_DISPLAY
+                    + " exception(s) of the batch insert.");
+              }
+              throw oe;
+            }
+          }
+
+          info("  " + DF.format(rowsCount) + " row(s) copied");
+          grandTotalRows = grandTotalRows + rowsCount;
+
         }
-
-        info("  " + DF.format(rowsCount) + " row(s) copied");
-        grandTotalRows = grandTotalRows + rowsCount;
-
       }
 
     }
