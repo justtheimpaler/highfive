@@ -1,22 +1,28 @@
 # HighFive
 
-HighFive reads the data in the tables of a database schema and hashes it with the aim of comparing
-it to a destination database schema where this data has been migrated. The destination database
-can be of the same or different brand.
+HighFive helps with migrating data from one database to another, especially when these databases are of different vendors.
 
-Its main goal is to compare data between different database vendors during a database migration.
-In cases like these, typical vendor-specific tools that only work between instances of the same
-database brand are not useful for the data verification.
+The main functionality of HighFive is to **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa). HighFive comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for the data verification. Also, third-party tools that specialize in this scenarios can be expensive to use. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
 
-The implemented strategy considers computing the hash values of all the data in both schemas using
-the SHA-256 algorithm. Once this is done it becomes trivial to compare the hashed values between
-schemas and decide if they fully match or not.
+Additionally, HighFive can also **compare the data between two (or more) databases**. This is particularly useful to verify the data was copied correctly to a destination database (by this tool or by another one). It performs this comparison by computing hash values for each table in one database (the "baseline database") and then by computing again the hash values in the other database(s). If the data was copied correctly these hashes will fully match. The implemented strategy considers computing the hash values of all the data in both schemas using the SHA-256 algorithm. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
 
 ## Limitations
 
 This tool has the following limitations.
 
-### 1. Tables Must Be Sortable
+### 1. Supported Databases
+
+This tool currently supports the following databases:
+
+- Oracle
+- DB2 LUW
+- PostgreSQL
+- SQL Server
+- MySQL
+- MariaDB
+
+
+### 2. The Tables Must Be Sortable
 
 Since hashing functions require ordered data sets, the ordering of rows is significant. This
 means that the rows in both the source and destination databases must be hashed in the exact
@@ -41,19 +47,6 @@ the property `<datasource>.table.filter`. In this case, this table would fall ou
 of this tool and would need to be verified in a different way.
 
 See the section **Hashing Ordering** for detail on how to declare specific orderings.
-
-### 2. Supported Databases
-
-This tool currently supports the following databases:
-
-- Oracle
-- DB2 LUW
-- PostgreSQL
-- SQL Server
-- MySQL
-- MariaDB
-
-It's not difficult to add support for more databases (just add a new Dialect implementation).
 
 ### 3. Supported Data Types
 
@@ -116,7 +109,7 @@ To use this tool you need:
 
 - Access to the command line.
 - Java 8 or newer installed.
-- A folder where to install the tool, the JDBC driver JAR file(s), and the configuration file.
+- A folder (the working folder) where to install the tool, the JDBC driver JAR file(s), and the configuration file.
 
 To use it follow the steps:
 
