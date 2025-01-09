@@ -22,24 +22,20 @@ This tool currently supports the following databases:
 - MariaDB
 
 
-### 2. The Tables Must Be Sortable
+### 2. When Verifying Data The Tables Must Be Sortable
 
-For data verification purposes the tables must be sortable. This is not required for the data copy.
+For data verification purposes the tables must be sortable. This is not required when copying data.
 
-Since hashing functions require ordered data sets, the ordering of rows is significant. This
-means that the rows in both the source and destination databases must be hashed in the exact
-same ordering.
+Since the hashing functions used for verification require ordered data sets, the ordering of the retrieved rows is significant. This means that the rows in both the source and destination databases must be read and hashed in the exact same ordering.
 
-To ensure a deterministic and stable ordering HighFive can use:
+To ensure a deterministic and stable ordering HighFive can:
 
-1. It automatically detects the **primary keys** of the tables and uses them by default for sorting purposes.
-2. If a table does not have a primary key it can still be hashed by **declaring a list of columns** for sorting using the property `<datasource>.hashing.ordering`. Ideally this sorting order should
-produce no duplicate rows (for the ordering columns), so a non-nullable unique constraint or unique index are ideal for this purpose. If a hashing ordering is explicitly declared for a table, the primary key is ignored and this hashing ordering is used.
-3. As an option of last resort, **all the table columns** could also be used for ordering. This can work as long as all the columns of the table are actually sortable. However, this may prove to be impractical or unrealistic due to database resource constraints, particularly if the table has a massive number of rows (the engine may run out of resources while sorting) and/or has many heavy columns (it could take a very long time to sort data).
+1. Automatically detect the **primary keys** of the tables and use them by default for sorting purposes.
+2. If a table does not have a primary key it can still be hashed by **declaring a list of columns** for sorting purposes using the property `<datasource>.hashing.ordering`. Ideally this sorting order should
+produce no duplicate rows for the ordering columns, so a non-nullable unique constraint or index is ideal for this purpose. If a hashing ordering is explicitly declared for a table, the primary key is ignored and this hashing ordering is used instead.
+3. As an option of last resort, **all the columns of the table** can also be used for ordering. This can work as long as all the columns of the table are actually sortable. Even then, this solution may prove impractical or unrealistic due to database resource constraints, particularly if the table has a massive number of rows (the engine may run out of resources while sorting) and/or has many heavy columns (it could take a very long time to sort data).
 
-Finally, if none of the hashing ordering are practical, then the table can be excluded from HighFive using
-the property `<datasource>.table.filter`. In this case, this table would fall outside the scope
-of this tool and would need to be verified in a different way.
+Finally, if none of the hashing ordering are practical for a table, the table can be excluded from the verification using the property `<datasource>.table.filter`. In this case, this table would fall outside the scope of this tool and would need to be verified in a different way.
 
 See the section **Hashing Ordering** for details on how to declare specific orderings.
 
