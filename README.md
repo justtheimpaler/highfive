@@ -26,9 +26,18 @@ This tool currently supports the following databases:
 - MariaDB
 
 
-### 2. When Verifying Data The Tables Must Be Sortable
+### 2. Does Not Migrate Schemas And Tables Structures
 
-For data verification purposes the tables must be sortable. This is not required when copying data.
+The data copy functionality does not migrate schema and table's structures. When copying data between databases this tool expects the schema and tables in the destination one to be already present. These tables must also be empty, and with any constraints removed or disabled to prevent any error when inserting data.
+
+There are other tools in the market that migrate the structure of the schemas from one database to another; they typically create a schema with empty tables in the destination database. For example: the AWS Schema Convertion Tool (free and works quite well), Luna Modeler (paid edition), and other ETL tools.
+
+Once the table structures are ready HighFive can start migrating data.
+
+
+### 3. To Verify Data The Tables Must Be Sortable
+
+For data verification process to be able to work, the tables must be sortable. This only required for data verification purposes, not when copying data.
 
 Since the hashing functions used for verification require ordered data sets, the ordering of the retrieved rows is significant. This means that the rows in both the source and destination databases must be read and hashed in the exact same ordering.
 
@@ -39,11 +48,13 @@ To ensure a deterministic and stable ordering HighFive can:
 produce no duplicate rows for the ordering columns, so a non-nullable unique constraint or index is ideal for this purpose. If a hashing ordering is explicitly declared for a table, the primary key is ignored and this hashing ordering is used instead.
 3. As an option of last resort, **all the columns of the table** can also be used for ordering. This can work as long as all the columns of the table are actually sortable. Even then, this solution may prove impractical or unrealistic due to database resource constraints, particularly if the table has a massive number of rows (the engine may run out of resources while sorting) and/or has many heavy columns (it could take a very long time to sort data).
 
+**Note**: In some cases the sorting order of different databases can differ. This is typically the case for primary keys (or other sorting criteria) that include CHAR/VARCHAR columns that have incompatible/mismatching collations between databases. If this is the case, specify compatible collations for both databases explicitly in the configuration of the corresponding datasources.
+
 Finally, if none of the hashing ordering are practical for a table, the table can be excluded from the verification using the property `<datasource>.table.filter`. In this case, this table would fall outside the scope of this tool and would need to be verified in a different way.
 
 See the section **Hashing Ordering** for details on how to declare specific orderings.
 
-### 3. Supported Data Types
+### 4. Supported Data Types
 
 This tool supports all common data types such as VARCHAR, NUMERIC (all variations), DATE,
 TIMESTAMP w/wo TIME ZONE, BLOB, CLOB, etc. It does not support exotic types available is
@@ -57,7 +68,7 @@ command described below.
 
 See **Appendix A - Supported Data Types** for the full list of supported types in each database.
 
-### 4. Compares Identical Data With No Transformation
+### 5. Compares Identical Data With No Transformation
 
 This tool compares the data in multiple databases in identical form. That is, it compares a VARCHAR
 column to a VARCHAR column in another database, a NUMERIC column to a NUMERIC column in another database, and so forth. It does not account for data conversion or transformation. For example,
@@ -65,7 +76,7 @@ it cannot compare a BOOLEAN that is represented by a NUMERIC value in another da
 
 If data transformation needs to take place this tool can be useful to compare data in the destination database right after is transferred there, and ***before*** any transformation is applied.
 
-### 5. Identifiers That Differ Only In Letter Case Are Not Supported
+### 6. Identifiers That Differ Only In Letter Case Are Not Supported
 
 Since table names and column names may use a different letter case when migrating between
 databases, the matching of table and column names is done in a case-insensitive manner. That means
