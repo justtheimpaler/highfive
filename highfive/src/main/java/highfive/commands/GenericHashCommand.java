@@ -109,9 +109,11 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           int logCount = 0;
           int rowsCount = 0;
           while (rs.next()) {
+            if (this.ds.getLogHashingValues()) {
+              info("    * Row #" + (rowsCount + 1) + ":");
+            }
             int col = 1;
             byte[] bytes = null;
-            boolean first = true;
             for (Column c : t.getColumns()) {
               try {
                 bytes = c.getSerializer().read(rs, col++);
@@ -130,11 +132,9 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               }
               h.apply(bytes);
               if (this.ds.getLogHashingValues()) {
-                String bullet = first ? "*" : " ";
-                first = false;
                 byte[] d = h.getInProgressDigest();
-                info("    " + bullet + " " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: "
-                    + Utl.toHex(bytes) + " -- digest: " + Utl.toHex(d));
+                info("      " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes)
+                    + " -- digest: " + Utl.toHex(d));
               }
             }
             logCount++;
