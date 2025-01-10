@@ -13,6 +13,10 @@ public class BooleanSerializer extends Serializer<Boolean> {
 
   private Boolean value;
 
+  public BooleanSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     this.value = rs.getBoolean(ordinal);

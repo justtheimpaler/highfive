@@ -15,6 +15,10 @@ public class LocalDateTimeSerializer extends Serializer<LocalDateTime> {
 
   private LocalDateTime value;
 
+  public LocalDateTimeSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     rs.getObject(ordinal); // deals with the DB2 JDBC driver that doesn't handle nulls properly

@@ -50,6 +50,7 @@ public class DataSource {
   private ColumnFilter columnFilter;
   private TypeSolver solver;
   private Long maxRows;
+  private String hashingCollation;
   private boolean logHashingValues;
   private boolean logSQL;
   private long insertBatchSize;
@@ -66,7 +67,7 @@ public class DataSource {
   public DataSource(String name, String driverJAR, String driverClass, String url, String username, String password,
       String catalog, String schema, String removeTablePrefix, final Boolean declaredSelectAutoCommit,
       Integer selectFetchSize, final boolean readOnly, TableFilter tableFilter, ColumnFilter columnFilter, Long maxRows,
-      boolean logHashingValues, boolean logSQL, long insertBatchSize, TypeSolver solver,
+      String hashingCollation, boolean logHashingValues, boolean logSQL, long insertBatchSize, TypeSolver solver,
       LinkedHashMap<String, TableHashingOrdering> hashingOrderings)
       throws SQLException, UnsupportedDatabaseTypeException {
     this.name = name;
@@ -82,6 +83,7 @@ public class DataSource {
     this.tableFilter = tableFilter;
     this.columnFilter = columnFilter;
     this.maxRows = maxRows;
+    this.hashingCollation = hashingCollation;
     this.logHashingValues = logHashingValues;
     this.logSQL = logSQL;
     this.insertBatchSize = insertBatchSize;
@@ -282,6 +284,16 @@ public class DataSource {
       }
     }
 
+    // Hashing collation
+
+    String hashingCollation = props.getProperty(name + ".hashing.collation");
+
+    if (Utl.empty(hashingCollation)) {
+      hashingCollation = null;
+    } else {
+      hashingCollation = hashingCollation.trim();
+    }
+
     // Log Hashing Values
 
     boolean logHashingValues = false;
@@ -390,8 +402,8 @@ public class DataSource {
     }
 
     return new DataSource(name, driverJAR, driverClass, url, username, password, catalog, schema, removeTablePrefix,
-        declaredSelectAutoCommit, selectFetchSize, readOnly, tableFilter, columnFilter, maxRows, logHashingValues,
-        logSQL, insertBatchSize, solver, hashingOrderings);
+        declaredSelectAutoCommit, selectFetchSize, readOnly, tableFilter, columnFilter, maxRows, hashingCollation,
+        logHashingValues, logSQL, insertBatchSize, solver, hashingOrderings);
 
   }
 
@@ -494,6 +506,7 @@ public class DataSource {
     }
     info("  select autocommit: " + this.selectAutoCommit);
     info("  select fetch size: " + (this.selectFetchSize == null ? "--" : "" + this.selectFetchSize));
+    info("  hashing collation: " + (this.hashingCollation == null ? "--" : this.hashingCollation));
 
   }
 
@@ -545,6 +558,10 @@ public class DataSource {
 
   public Long getMaxRows() {
     return maxRows;
+  }
+
+  public String getHashingCollation() {
+    return hashingCollation;
   }
 
   public boolean getLogHashingValues() {

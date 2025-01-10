@@ -13,6 +13,10 @@ public class DoubleSerializer extends Serializer<Double> {
 
   private Double value;
 
+  public DoubleSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     this.value = rs.getDouble(ordinal);

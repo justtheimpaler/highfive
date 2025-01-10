@@ -221,6 +221,11 @@ public class OracleDialect extends Dialect {
   }
 
   @Override
+  public String addCollation(String columnCanonicalName, String collation) {
+    return columnCanonicalName + " collate " + collation;
+  }
+
+  @Override
   public String renderSQLTableIdentifier(Identifier table) {
     return (ds.getSchema() == null ? "" : escapeIdentifierAsNeeded(ds.getSchema()) + ".") + table.renderSQL();
   }

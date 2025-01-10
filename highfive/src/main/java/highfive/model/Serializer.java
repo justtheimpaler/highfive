@@ -23,10 +23,12 @@ import highfive.serializers.ZonedDateTimeSerializer;
 public abstract class Serializer<T> {
 
   private String name;
+  private boolean canUseACollation;
 
-  protected Serializer() {
+  protected Serializer(boolean canUseACollation) {
     String sn = this.getClass().getSimpleName();
     this.name = (sn.substring(0, sn.length() - "Serializer".length())).toLowerCase();
+    this.canUseACollation = canUseACollation;
   }
 
   public static Map<String, Serializer<?>> ALL = new HashMap<>();
@@ -62,6 +64,10 @@ public abstract class Serializer<T> {
 
   public String getName() {
     return name;
+  }
+
+  public boolean canUseACollation() {
+    return canUseACollation;
   }
 
   public abstract T getValue();

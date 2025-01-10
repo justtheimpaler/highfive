@@ -174,19 +174,46 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
       if (thms.isEmpty()) { // declared: *
 
-        selectOrdering = t.getColumns().stream().map(c -> c.getName()).collect(Collectors.joining(", "));
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Column c : t.getColumns()) {
+          if (first) {
+            first = false;
+          } else {
+            sb.append(", ");
+          }
+//          info(">> col=" + c.getCanonicalName() + " -- c.getSerializer()=" + c.getSerializer()
+//              + " -- c.getSerializer().canUseACollation()=" + c.getSerializer().canUseACollation());
+          String cm = this.ds.getDialect().escapeIdentifierAsNeeded(c.getCanonicalName());
+          if (c.getSerializer().canUseACollation() && this.ds.getHashingCollation() != null) {
+            cm = this.ds.getDialect().addCollation(cm, this.ds.getHashingCollation());
+          }
+          sb.append(cm);
+        }
+        selectOrdering = sb.toString();
 
       } else { // declared: columns
 
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (TableHashingMember m : thms) {
+          Column col = findColumn(m.getGenericColumnName(), t);
+          if (col == null) {
+            throw new CouldNotHashException("Could not find column '" + m.getGenericColumnName()
+                + "' specified in the hashing ordering in the table '" + t.getIdentifier().getCanonicalName() + "'.");
+          }
           if (first) {
             first = false;
           } else {
             sb.append(", ");
           }
-          sb.append(this.ds.getDialect().escapeIdentifierAsNeeded(m.getGenericColumnName()));
+
+          String cm = this.ds.getDialect().escapeIdentifierAsNeeded(m.getGenericColumnName());
+          if (col.getSerializer().canUseACollation() && this.ds.getHashingCollation() != null) {
+            cm = this.ds.getDialect().addCollation(cm, this.ds.getHashingCollation());
+          }
+
+          sb.append(cm);
           if (!m.isAscending()) {
             sb.append(" desc");
           }
@@ -220,6 +247,15 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
     }
     return selectOrdering;
+  }
+
+  private Column findColumn(String genericColumnName, Table t) {
+    for (Column col : t.getColumns()) {
+      if (col.getCanonicalName().equalsIgnoreCase(genericColumnName)) {
+        return col;
+      }
+    }
+    return null;
   }
 
 }

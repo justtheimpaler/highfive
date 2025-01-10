@@ -14,6 +14,10 @@ public class IntegerSerializer extends Serializer<Integer> {
 
   private Integer value;
 
+  public IntegerSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     this.value = rs.getInt(ordinal);

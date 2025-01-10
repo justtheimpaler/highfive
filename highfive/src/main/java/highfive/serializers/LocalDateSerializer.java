@@ -14,6 +14,10 @@ public class LocalDateSerializer extends Serializer<LocalDate> {
 
   private LocalDate value;
 
+  public LocalDateSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     rs.getObject(ordinal); // deals with the DB2 JDBC driver that doesn't handle nulls properly

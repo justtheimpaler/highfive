@@ -235,6 +235,11 @@ public class SQLServerDialect extends Dialect {
   }
 
   @Override
+  public String addCollation(String columnCanonicalName, String collation) {
+    return columnCanonicalName + " collate " + collation;
+  }
+
+  @Override
   public String renderHeadLimit(Long limit) {
     return limit == null ? "" : (" top " + limit);
   }

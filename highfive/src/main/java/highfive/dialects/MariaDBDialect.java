@@ -224,6 +224,11 @@ public class MariaDBDialect extends Dialect {
   }
 
   @Override
+  public String addCollation(String columnCanonicalName, String collation) {
+    return columnCanonicalName + " collate '" + collation + "'";
+  }
+
+  @Override
   public String renderSQLTableIdentifier(Identifier table) {
     String database = Utl.coalesce(this.ds.getCatalog(), this.ds.getSchema());
     return (database == null ? "" : escapeIdentifierAsNeeded(database) + ".") + table.renderSQL();

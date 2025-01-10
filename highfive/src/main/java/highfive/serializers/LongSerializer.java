@@ -14,6 +14,10 @@ public class LongSerializer extends Serializer<Long> {
 
   private Long value;
 
+  public LongSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     this.value = rs.getLong(ordinal);

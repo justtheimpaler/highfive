@@ -14,6 +14,10 @@ public class ZonedDateTimeSerializer extends Serializer<ZonedDateTime> {
 
   private ZonedDateTime value;
 
+  public ZonedDateTimeSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     rs.getObject(ordinal); // deals with the DB2 JDBC driver that doesn't handle nulls properly

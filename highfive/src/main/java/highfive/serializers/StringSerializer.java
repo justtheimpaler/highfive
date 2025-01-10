@@ -11,6 +11,10 @@ public class StringSerializer extends Serializer<String> {
 
   private String value;
 
+  public StringSerializer() {
+    super(true);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     this.value = rs.getString(ordinal);

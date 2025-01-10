@@ -43,6 +43,11 @@ public class DialectNormalizer extends Dialect {
   }
 
   @Override
+  public String addCollation(String columnCanonicalName, String collation) {
+    return this.dialect.addCollation(columnCanonicalName, collation);
+  }
+
+  @Override
   public String renderSQLTableIdentifier(Identifier table) {
     return this.dialect.renderSQLTableIdentifier(table);
   }

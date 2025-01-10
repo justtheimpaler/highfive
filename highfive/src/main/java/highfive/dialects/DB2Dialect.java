@@ -177,6 +177,11 @@ public class DB2Dialect extends Dialect {
   }
 
   @Override
+  public String addCollation(String columnCanonicalName, String collation) {
+    return "COLLATION_KEY_BIT(" + columnCanonicalName + ", '" + collation + "')";
+  }
+
+  @Override
   public String renderSQLTableIdentifier(Identifier table) {
     return (this.ds.getSchema() == null ? "" : escapeIdentifierAsNeeded(this.ds.getSchema()) + ".") + table.renderSQL();
   }

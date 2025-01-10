@@ -10,6 +10,10 @@ public class ByteArraySerializer extends Serializer<byte[]> {
 
   private byte[] value;
 
+  public ByteArraySerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     this.value = rs.getBytes(ordinal);

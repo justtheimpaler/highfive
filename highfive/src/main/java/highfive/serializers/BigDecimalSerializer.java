@@ -10,6 +10,10 @@ import highfive.model.Serializer;
 
 public class BigDecimalSerializer extends Serializer<BigDecimal> {
 
+  public BigDecimalSerializer() {
+    super(false);
+  }
+
   private BigDecimal value;
 
   @Override

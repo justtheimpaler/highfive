@@ -11,6 +11,10 @@ public class BigIntegerSerializer extends Serializer<BigInteger> {
 
   private BigInteger value;
 
+  public BigIntegerSerializer() {
+    super(false);
+  }
+
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
     this.value = rs.getObject(ordinal, BigInteger.class);

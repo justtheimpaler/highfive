@@ -40,6 +40,8 @@ public abstract class Dialect {
 
   public abstract String escapeIdentifierAsNeeded(String canonicalName);
 
+  public abstract String addCollation(String columnCanonicalName, String collation);
+
   public abstract String renderSQLTableIdentifier(Identifier table);
 
   public abstract String renderHeadLimit(Long limit);
