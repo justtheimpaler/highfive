@@ -115,12 +115,6 @@ public abstract class GenericHashCommand extends DataSourceCommand {
             for (Column c : t.getColumns()) {
               try {
                 bytes = c.getSerializer().read(rs, col++);
-                if (this.ds.getLogHashingValues()) {
-                  String bullet = first ? "*" : " ";
-                  first = false;
-                  info("    " + bullet + " " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: "
-                      + Utl.toHex(bytes));
-                }
               } catch (SQLException e) {
                 error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
                     + tn.getCanonicalName() + "' as a '" + c.getSerializer().getName()
@@ -135,6 +129,13 @@ public abstract class GenericHashCommand extends DataSourceCommand {
                 throw e;
               }
               h.apply(bytes);
+              if (this.ds.getLogHashingValues()) {
+                String bullet = first ? "*" : " ";
+                first = false;
+                byte[] d = h.getInProgressDigest();
+                info("    " + bullet + " " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: "
+                    + Utl.toHex(bytes) + " -- digest: " + Utl.toHex(d));
+              }
             }
             logCount++;
             rowsCount++;

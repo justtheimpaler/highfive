@@ -22,6 +22,11 @@ public class Hasher {
     this.digest.update(v == null ? NULL : v);
   }
 
+  public byte[] getInProgressDigest() throws CloneNotSupportedException {
+    MessageDigest c = (MessageDigest) this.digest.clone();
+    return c.digest();
+  }
+
   public byte[] close() {
     if (!this.active) {
       throw new RuntimeException("Hasher is already closed.");
