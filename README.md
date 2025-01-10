@@ -174,7 +174,7 @@ The configurable properties are:
 
 | Property | Description |
 | --       | --          |
-| `<datasource>.driver.jar`           | Path of the JDBC driver JAR library (that you downloaded) |
+| `<datasource>.driver.jar`           | Path to the JDBC driver JAR library (that you downloaded) |
 | `<datasource>.driver.class`         | The JDBC driver class name (see the database docs) |
 | `<datasource>.url`                  | The database connection URL |
 | `<datasource>.username`             | The database connection username |
@@ -187,9 +187,9 @@ The configurable properties are:
 | `<datasource>.max.rows`             | Optional. Limits the maximum number of rows per table to be hashed. Could be useful for test runs of for debugging if you want to work with a small and fast data set |
 | `<datasource>.select.autocommit`    | Optional. Overrides the default autocommit mode for SELECT queries. PostgreSQL defaults to `false` while the other databases default to `true`. This autocommit mode is used to run large SELECT queries. For more details see the section **Autocommit While Reading** below |
 | `<datasource>.select.fetch.size`    | Optional. Used in conjunction with `<datasource>.select.autocommit` to enable buffering in SELECTs in some databases. If not specified defaults to 100 |
-| `<datasource>.hashing.collation`    | Optional. Specifies the collation for the VARCHAR/CHAR columns used in the sorting ordering when hashing the data of the tables. This is particularly useful when two databases use different collations and sort rows in different order by default. If specified this collation will be applied to all VARCHAR/CHAR columns in the ORDER BY clause, notwithstanding they belong to the primary key or other index/constraint on the table. This is only used for sorting purposes, not for converting data before hashing |
 | `<datasource>.type.rules`           | Optional. Rules to override the default Java types used for each database type; it's a semicolon-separated list of rules. For more details see the section **Type Rules** below |
 | `<datasource>.hashing.ordering` | Optional. Declares hashing ordering. It overrides the primary key ordering for tables with primary keys, and declares a specific ordering for tables with no primary keys. It takes the form of a semicolon-separated list of table sorting rules. For more details see the section **Hashing Ordering** below |
+| `<datasource>.hashing.collation`    | Optional. Specifies the collation for the VARCHAR/CHAR columns used in the sorting ordering when hashing the data of the tables. This is particularly useful when two databases use different collations and sort rows in different order by default. If specified, this collation will be applied to all VARCHAR/CHAR columns in the ORDER BY clause, notwithstanding they belong to the primary key or other index/constraint on the table. This is only used for sorting purposes, not for converting/massaging data before hashing |
 | `<datasource>.readonly` | Optional. Declares this datasource as readonly (default) or writable. This property is  a safeguard to protect the datasources when copying data. A destination datasouce needs to be explicitly set as writable (`readonly=false`) for the `copy` command to work |
 | `<datasource>.insert.batch.size` | Optional. Declares the insert batch size when copying data from one database to another. Defaults to 100 |
 | `<datasource>.log.sql`              | Optional. Defaults to `false`. Log the SQL queries executed in the datasource |
