@@ -246,10 +246,22 @@ public abstract class GenericHashCommand extends DataSourceCommand {
                 + "' has no primary key and no hashing ordering was declared using the property '" + this.ds.getName()
                 + ".hashing.ordering'.");
       }
-      selectOrdering = t.getColumns().stream().filter(c -> c.getPKPosition() != null)
-          .sorted((a, b) -> a.getPKPosition().compareTo(b.getPKPosition()))
-          .map(c -> this.ds.getDialect().escapeIdentifierAsNeeded(c.getCanonicalName()))
-          .collect(Collectors.joining(", "));
+
+      StringBuilder sb = new StringBuilder();
+      boolean first = true;
+      for (Column c : pkColumns) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(", ");
+        }
+        String cm = this.ds.getDialect().escapeIdentifierAsNeeded(c.getCanonicalName());
+        if (c.getSerializer().canUseACollation() && this.ds.getHashingCollation() != null) {
+          cm = this.ds.getDialect().addCollation(cm, this.ds.getHashingCollation());
+        }
+        sb.append(cm);
+      }
+      selectOrdering = sb.toString();
 
     }
     return selectOrdering;
