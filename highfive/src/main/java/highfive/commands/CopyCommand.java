@@ -175,7 +175,6 @@ public class CopyCommand extends DualDataSourceCommand {
           .map(c -> this.ds.getDialect().escapeIdentifierAsNeeded(c.source.getCanonicalName()))
           .collect(Collectors.joining(", "));
       String select = "select " + snames + " from " + stid;
-//      info("-- select: " + select);
 
       String dtid = this.ds2.getDialect().renderSQLTableIdentifier(pair.dest);
       String dnames = pair.columns.stream()
@@ -183,7 +182,8 @@ public class CopyCommand extends DualDataSourceCommand {
           .collect(Collectors.joining(", "));
       String insert = "insert into " + dtid + " (" + dnames + ") values ("
           + pair.columns.stream().map(x -> "?").collect(Collectors.joining(", ")) + ")";
-//      info("-- insert: " + insert);
+
+      this.ds.getConnection().setAutoCommit(true); // end the current transaction, if any
 
       this.ds.getConnection().setAutoCommit(this.ds.getSelectAutoCommit());
 

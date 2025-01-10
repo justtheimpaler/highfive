@@ -94,6 +94,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       }
       Hasher h = new Hasher();
 
+      this.ds.getConnection().setAutoCommit(true); // end the current transaction, if any
+
       this.ds.getConnection().setAutoCommit(this.ds.getSelectAutoCommit());
 
       try (PreparedStatement ps = this.ds.getConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
@@ -149,6 +151,9 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           byte[] tableHash = h.close();
           hashFile.add(Utl.toHex(tableHash), tn.getGenericName());
           info("    " + DF.format(rowsCount) + " row(s) read");
+        } catch (Throwable e) {
+          e.printStackTrace(System.out);
+          info("    Failed to read table " + tn.getGenericName() + " -- skipped");
         }
       }
 
