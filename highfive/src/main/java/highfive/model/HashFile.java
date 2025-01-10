@@ -22,7 +22,7 @@ public class HashFile {
 
   public void add(String hash, String table) throws InvalidHashFileException {
     if (this.map.containsKey(table)) {
-      throw new InvalidHashFileException("Duplicate table t.");
+      throw new InvalidHashFileException("Duplicate table '" + table + "'.");
     }
     this.map.put(table, hash);
   }
@@ -44,7 +44,7 @@ public class HashFile {
       while ((line = r.readLine()) != null) {
         if (!line.matches("^[0-9a-f]{64} .+$")) {
           throw new InvalidHashFileException("Line #" + lineNumber
-              + " has an invalid hash format. Must be a 40-char hexa value, a space, and a table name (in lower case).");
+              + " has an invalid hash format. Must be a 64-char hexa value, a space, and a table name (in lower case).");
         }
         String hash = line.substring(0, 64);
         String table = line.substring(65);
@@ -55,29 +55,54 @@ public class HashFile {
     return hf;
   }
 
-  public List<String> compareTo(final HashFile other, final String thisName, final String otherName) {
+  public static class ComparisonResult {
 
-    List<String> msg = new ArrayList<>();
+    private int matched = 0;
+    private List<String> errors = new ArrayList<>();
+
+    public void addMatched() {
+      this.matched++;
+    }
+
+    public void addError(String error) {
+      this.errors.add(error);
+    }
+
+    public int getMatched() {
+      return matched;
+    }
+
+    public List<String> getErrors() {
+      return errors;
+    }
+
+  }
+
+  public ComparisonResult compareTo(final HashFile other, final String thisName, final String otherName) {
+
+    ComparisonResult r = new ComparisonResult();
 
     for (String table : this.map.keySet()) {
       String hash = this.map.get(table);
       if (!other.map.containsKey(table)) {
-        msg.add("Table '" + table + "' found in the " + thisName + ", but not in the " + otherName + ".");
+        r.addError("Table '" + table + "' found in the " + thisName + ", but not in the " + otherName + ".");
       } else {
         String ohash = other.map.get(table);
         if (Utl.distinct(hash, ohash)) {
-          msg.add("Different hash values found for table '" + table + "' in the databases.");
+          r.addError("Different hash values found for table '" + table + "' in the databases.");
+        } else {
+          r.addMatched();
         }
       }
     }
 
     for (String table : other.map.keySet()) {
       if (!this.map.containsKey(table)) {
-        msg.add("Table '" + table + "' found in the " + otherName + ", but not in the " + thisName + ".");
+        r.addError("Table '" + table + "' found in the " + otherName + ", but not in the " + thisName + ".");
       }
     }
 
-    return msg;
+    return r;
 
   }
 

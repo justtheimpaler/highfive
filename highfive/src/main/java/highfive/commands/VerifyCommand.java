@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.List;
 
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
@@ -12,6 +11,7 @@ import highfive.exceptions.InvalidHashFileException;
 import highfive.exceptions.InvalidSchemaException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
 import highfive.model.HashFile;
+import highfive.model.HashFile.ComparisonResult;
 
 public class VerifyCommand extends GenericHashCommand {
 
@@ -35,14 +35,15 @@ public class VerifyCommand extends GenericHashCommand {
     info(" ");
     info("Verifying hashes:");
 
-    List<String> errors = existing.compareTo(hashFile, "baseline hash file", "live database");
-    for (String err : errors) {
+    ComparisonResult result = existing.compareTo(hashFile, "baseline hash file", "live database");
+    for (String err : result.getErrors()) {
       error("  - " + err);
     }
-    if (errors.isEmpty()) {
-      info("  All data hashes match -- The verification succeeded.");
+    if (result.getErrors().isEmpty()) {
+      info("  All data hashes match (" + result.getMatched() + " tables) -- The verification succeeded.");
     } else {
-      error("  There were a total of " + errors.size() + " difference(s) in the hashes -- The verification failed.");
+      error("  A total of " + result.getMatched() + " tables matched and there were " + result.getErrors().size()
+          + " difference(s) in the hashes -- The verification failed.");
     }
 
   }
