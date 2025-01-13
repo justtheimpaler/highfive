@@ -22,7 +22,7 @@ public class HashCommand extends GenericHashCommand {
       throws NoSuchAlgorithmException, SQLException, UnsupportedDatabaseTypeException, InvalidSchemaException,
       CouldNotHashException, IOException, InvalidHashFileException, InvalidConfigurationException {
 
-    super.hash();
+    super.hash(null);
 
   }
 

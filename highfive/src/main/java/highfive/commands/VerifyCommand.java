@@ -30,7 +30,7 @@ public class VerifyCommand extends GenericHashCommand {
 
     HashFile existing = HashFile.loadFrom(this.baselineFile);
 
-    super.hash();
+    super.hash(null);
 
     info(" ");
     info("Verifying hashes:");

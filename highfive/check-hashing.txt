@@ -1,0 +1,14 @@
+select count(*) as dupes, sum(cnt) as occurrences
+from (
+  select count(*) as cnt
+  from t
+  group by c1, c2
+  having count(*) > 1
+) x
+
+select count(*) as dupes, sum(cnt) as occurrences from (select count(*) as cnt from t group by c1, c2 having count(*) > 1) x
+
+
+-- hashdupes <src
+-- hashdump <src> <table> [<start> <end> [<step>]]
+-- hashcompare <dest> <dump-file>

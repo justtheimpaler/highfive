@@ -10,6 +10,9 @@ import java.util.logging.Level;
 import highfive.commands.Command;
 import highfive.commands.CopyCommand;
 import highfive.commands.HashCommand;
+import highfive.commands.HashDumpCommand;
+import highfive.commands.HashDumpCommand.HashDumpConfig;
+import highfive.commands.HashDupesCommand;
 import highfive.commands.ListColumnsAndCheckCommand;
 import highfive.commands.ListTablesAndCheckCommand;
 import highfive.commands.VerifyCommand;
@@ -63,6 +66,49 @@ public class HighFive {
           error("Could not hash data: " + e.getMessage());
           System.exit(1);
         }
+      } else if (args.length == 2 && "hashdupes".equals(args[0])) {
+        try {
+          Command c = new HashDupesCommand(args[1]);
+          c.run();
+          System.exit(0);
+        } catch (ApplicationException e) {
+          error("Could not search for hash dupes: " + e.getMessage());
+          System.exit(1);
+        }
+
+//    0        1     2        3       4      5
+// -- hashdump <src> <table> [<start> <end> [<step>]]
+      } else if (args.length == 3 && "hashdump".equals(args[0])) {
+        try {
+          HashDumpConfig config = HashDumpConfig.of(args[2]);
+          Command c = new HashDumpCommand(args[1], config);
+          c.run();
+          System.exit(0);
+        } catch (ApplicationException e) {
+          error("Could not generate the hashdump: " + e.getMessage());
+          System.exit(1);
+        }
+      } else if (args.length == 5 && "hashdump".equals(args[0])) {
+        try {
+          HashDumpConfig config = HashDumpConfig.of(args[2], args[3], args[4]);
+          Command c = new HashDumpCommand(args[1], config);
+          c.run();
+          System.exit(0);
+        } catch (ApplicationException e) {
+          error("Could not generate the hashdump: " + e.getMessage());
+          System.exit(1);
+        }
+      } else if (args.length == 6 && "hashdump".equals(args[0])) {
+        try {
+          HashDumpConfig config = HashDumpConfig.of(args[2], args[3], args[4], args[5]);
+          Command c = new HashDumpCommand(args[1], config);
+          c.run();
+          System.exit(0);
+        } catch (ApplicationException e) {
+          error("Could not generate the hashdump: " + e.getMessage());
+          System.exit(1);
+        }
+
       } else if (args.length == 3 && "verify".equals(args[0])) {
         try {
           Command c = new VerifyCommand(args[1], args[2]);

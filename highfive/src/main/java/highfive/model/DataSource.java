@@ -57,6 +57,7 @@ public class DataSource {
   private LinkedHashMap<String, TableHashingOrdering> hashingOrderings;
 
   private String hashFileName;
+  private String hashDumpFileName;
 
   private Dialect dialect;
   private Connection conn;
@@ -92,6 +93,7 @@ public class DataSource {
     this.selectFetchSize = selectFetchSize;
 
     this.hashFileName = name + ".hash";
+    this.hashDumpFileName = name + ".dumphash";
 
     // 1. Load the JDBC driver jar file
 
@@ -582,6 +584,10 @@ public class DataSource {
 
   public String getHashFileName() {
     return hashFileName;
+  }
+
+  public String getHashDumpFileName() {
+    return hashDumpFileName;
   }
 
   public Dialect getDialect() {
