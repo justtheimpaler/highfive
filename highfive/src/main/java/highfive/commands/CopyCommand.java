@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,10 +36,18 @@ public class CopyCommand extends DualDataSourceCommand {
     // 1. Match tables
 
     List<Identifier> stables = this.ds.getDialect().listTablesNames();
-    Map<String, Identifier> sid = stables.stream().collect(Collectors.toMap(t -> t.getGenericName(), t -> t));
+//    Map<String, Identifier> sid = stables.stream().collect(Collectors.toMap(t -> t.getGenericName(), t -> t));
+    Map<String, Identifier> sid = new LinkedHashMap<>();
+    for (Identifier id : stables) {
+      sid.put(id.getGenericName(), id);
+    }
 
     List<Identifier> dtables = this.ds2.getDialect().listTablesNames();
-    Map<String, Identifier> did = dtables.stream().collect(Collectors.toMap(t -> t.getGenericName(), t -> t));
+//    Map<String, Identifier> did = dtables.stream().collect(Collectors.toMap(t -> t.getGenericName(), t -> t));
+    Map<String, Identifier> did = new LinkedHashMap<>();
+    for (Identifier id : dtables) {
+      did.put(id.getGenericName(), id);
+    }
 
     if (this.ds2.getReadOnly()) {
       errors.add("Could not copy data to the datasource '" + this.ds2.getName()
