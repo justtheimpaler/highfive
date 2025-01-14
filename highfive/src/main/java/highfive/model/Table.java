@@ -12,6 +12,8 @@ public class Table {
   public Table(Identifier identifier, List<Column> columns) {
     this.identifier = identifier;
     this.columns = columns;
+//    System.out
+//        .println("### columns=" + columns.stream().map(c -> c.getCanonicalName()).collect(Collectors.joining(", ")));
   }
 
   public Identifier getIdentifier() {

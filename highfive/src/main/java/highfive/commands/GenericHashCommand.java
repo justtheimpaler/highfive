@@ -8,8 +8,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import highfive.commands.HashDumpCommand.HashDumpConfig;
 import highfive.exceptions.CouldNotHashException;
@@ -115,10 +118,15 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     Identifier tn = t.getIdentifier();
 
     info("  Hashing table: " + tn.renderSQL());
+
+//    info(">>> cols=" + t.getColumns().stream().map(c -> c.getCanonicalName()).collect(Collectors.joining(", ")));
+
     String names = t.getColumns().stream().map(c -> this.ds.getDialect().escapeIdentifierAsNeeded(c.getCanonicalName()))
         .collect(Collectors.joining(", "));
+//    info(">>> names=" + names);
 
     String selectOrdering = renderOrdering(t);
+    RowComparator rowComparator = getRowComparator(t);
 
     String tid = this.ds.getDialect().renderSQLTableIdentifier(tn);
     String sql = "select" + this.ds.getDialect().renderHeadLimit(ds.getMaxRows()) + " " + names + " from " + tid
@@ -150,7 +158,9 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           byte[] bytes = null;
           for (Column c : t.getColumns()) {
             try {
-              bytes = c.getSerializer().read(rs, col++);
+              bytes = c.getSerializer().read(rs, col);
+              String v = "" + c.getSerializer().getValue();
+              rowComparator.setColumn(col, v);
             } catch (SQLException e) {
               error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
                   + tn.getCanonicalName() + "' as a '" + c.getSerializer().getName()
@@ -170,6 +180,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               info("      " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes)
                   + " -- digest: " + Utl.toHex(d));
             }
+            col++;
           }
           logCount++;
           rowsCount++;
@@ -182,6 +193,22 @@ public abstract class GenericHashCommand extends DataSourceCommand {
                 + " rows (max.rows) reached when reading this table -- moving on to the next table.");
             break;
           }
+
+          boolean hasValidOrdering = rowComparator.hasValidOrdering();
+//          info("row " + rowsCount + ": hasValidOrdering=" + hasValidOrdering);
+          if (!hasValidOrdering) {
+            error("Unpredictable hashing ordering found in table " + tn.getCanonicalName()
+                + "; found two rows with the same value in the ordering columns ("
+                + rowComparator.getOrderingColumns().stream().collect(Collectors.joining(", "))
+                + "), but different value in the non-ordering columns:");
+            error(" * Row 1: " + rowComparator.renderPreviousRow());
+            error(" * Row 2: " + rowComparator.renderCurrentRow());
+            error("-- skipping the table " + tn.getCanonicalName() + ".");
+            return;
+          }
+
+          rowComparator.next();
+
         }
         byte[] tableHash = h.close();
         hashFile.add(Utl.toHex(tableHash), tn.getGenericName());
@@ -293,6 +320,139 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
     }
     return selectOrdering;
+  }
+
+  private RowComparator getRowComparator(Table t) {
+
+    Map<String, Integer> ordinals = new HashMap<>();
+    int ordinal = 1;
+    for (Column c : t.getColumns()) {
+      ordinals.put(c.getCanonicalName(), ordinal);
+      ordinal++;
+    }
+
+    List<String> columnNames = t.getColumns().stream().map(c -> c.getName()).collect(Collectors.toList());
+    List<Integer> orderingColumnsOrdinals;
+
+    TableHashingOrdering tho = this.ds.getHashingOrderings().get(t.getIdentifier().getGenericName());
+    if (tho == null) { // ordering not declared -- use the PK
+      orderingColumnsOrdinals = t.getColumns().stream().filter(c -> c.getPKPosition() != null)
+          .map(c -> ordinals.get(c.getCanonicalName())).collect(Collectors.toList());
+    } else {
+      Collection<TableHashingMember> thms = tho.getMembers().values();
+      if (thms.isEmpty()) { // ordering declared as: *
+        orderingColumnsOrdinals = IntStream.range(1, t.getColumns().size() + 1).boxed().collect(Collectors.toList());
+      } else { // ordering declared as a list of columns
+        orderingColumnsOrdinals = new ArrayList<>();
+        for (TableHashingMember m : thms) {
+          Column col = t.findColumn(m.getGenericColumnName());
+          orderingColumnsOrdinals.add(ordinals.get(col.getCanonicalName()));
+        }
+      }
+    }
+
+//    info(">>>> orderingColumnsOrdinals=" + orderingColumnsOrdinals);
+
+    return new RowComparator(columnNames, orderingColumnsOrdinals);
+  }
+
+  private static class RowComparator {
+
+    private int numberOfColumns;
+    private String[] columnNames;
+
+    private boolean firstRow;
+    private boolean[] usedForOrdering;
+    private String[] previousRow;
+    private String[] currentRow;
+
+    private List<String> orderingColumns;
+
+    public RowComparator(List<String> columnNames, List<Integer> orderingColumnsOrdinals) {
+
+      this.numberOfColumns = columnNames.size();
+      this.columnNames = columnNames.toArray(new String[0]);
+
+      this.firstRow = true;
+      this.usedForOrdering = new boolean[this.numberOfColumns];
+      this.previousRow = new String[this.numberOfColumns];
+      this.currentRow = new String[this.numberOfColumns];
+      for (int i = 0; i < this.numberOfColumns; i++) {
+        this.usedForOrdering[i] = false;
+        this.previousRow[i] = null;
+        this.currentRow[i] = null;
+      }
+//      System.out.println("*** orderingColumnsOrdinals=" + orderingColumnsOrdinals);
+
+      this.orderingColumns = orderingColumnsOrdinals.stream().map(o -> this.columnNames[o - 1])
+          .collect(Collectors.toList());
+
+      for (Integer ordinal : orderingColumnsOrdinals) {
+        this.usedForOrdering[ordinal - 1] = true;
+      }
+    }
+
+    public void setColumn(int ordinal, String value) {
+      this.currentRow[ordinal - 1] = value;
+    }
+
+    public boolean hasValidOrdering() {
+      if (this.firstRow) {
+        this.firstRow = false;
+        return true;
+      } else {
+
+        boolean equalOrdering = true;
+        boolean equalRest = true;
+
+        for (int i = 0; i < this.numberOfColumns; i++) {
+          boolean eq = this.currentRow[i].equals(this.previousRow[i]);
+//          System.out.println(" -- i=" + i + " - usedForOrdering=" + usedForOrdering[i] + " eq=" + eq);
+          if (this.usedForOrdering[i]) {
+            equalOrdering = equalOrdering && eq;
+          } else {
+            equalRest = equalRest && eq;
+          }
+        }
+
+//        System.out.println("equalOrdering=" + equalOrdering + " equalRest=" + equalRest);
+
+        if (equalOrdering) {
+          return equalRest;
+        } else {
+          return true;
+        }
+      }
+    }
+
+    public void next() {
+      this.previousRow = this.currentRow;
+      this.currentRow = new String[this.numberOfColumns];
+    }
+
+    public String renderCurrentRow() {
+      return this.renderRow(this.currentRow);
+    }
+
+    public String renderPreviousRow() {
+      return this.renderRow(this.previousRow);
+    }
+
+    private String renderRow(String[] values) {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < this.numberOfColumns; i++) {
+        if (i > 0) {
+          sb.append(", ");
+        }
+        sb.append(this.columnNames[i] + "=" + values[i]);
+      }
+      return sb.toString();
+    }
+
+    public List<String> getOrderingColumns() {
+      return orderingColumns;
+    }
+
   }
 
 }

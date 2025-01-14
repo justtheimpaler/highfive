@@ -79,10 +79,10 @@ public class HashDupesCommand extends DataSourceCommand {
 
     if (tablesWithDupes == 0) {
       if (failedTables == 0) {
-        info("Validation succeeded -- No dupes found in all " + tableNames.size() + " tables.");
+        info("Validation succeeded -- No dupes found in any table.");
       } else {
-        info("Validation failed -- No dupes found in all " + tableNames.size() + " tables, but " + failedTables
-            + " tables could not be inspected.");
+        info("Validation failed -- No dupes found in " + tableNames.size() + " table(s), but " + failedTables
+            + " table(s) could not be inspected.");
       }
     } else {
       info("Validation failed -- Dupes were found in " + tablesWithDupes + " out of " + tableNames.size() + " tables.");
