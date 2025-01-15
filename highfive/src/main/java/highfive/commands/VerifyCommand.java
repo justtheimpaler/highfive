@@ -40,10 +40,18 @@ public class VerifyCommand extends GenericHashCommand {
       error("  - " + err);
     }
     if (result.getErrors().isEmpty()) {
-      info("  All data hashes match (" + result.getMatched() + " tables) -- The verification succeeded.");
+      info("  All data hashes match (" + result.getMatched() + " tables) -- The verification succeeded"
+          + (result.isNonDeterministic()
+              ? ", although with warnings, since the hashing ordering was non-deterministic in the source and/or the target databases"
+              : "")
+          + ".");
     } else {
       error("  A total of " + result.getMatched() + " tables matched and there were " + result.getErrors().size()
-          + " difference(s) in the hashes -- The verification failed.");
+          + " difference(s) in the hashes -- The verification failed"
+          + (result.isNonDeterministic()
+              ? ", although with warnings, since the hashing ordering was non-deterministic in the source and/or the target databases"
+              : "")
+          + ".");
     }
 
   }

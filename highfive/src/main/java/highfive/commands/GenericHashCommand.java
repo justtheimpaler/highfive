@@ -200,7 +200,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           if (!hasValidOrdering) {
             orderingErrors++;
             if (orderingErrors <= MAX_ORDERING_ERRORS) {
-              error("Non-deterministic hashing ordering found in table '" + tn.getCanonicalName() + "' ("
+              error("Non-deterministic hashing ordering found in table '" + tn.getCanonicalName() + "' (#"
                   + orderingErrors + "); found at least two rows with the same value in the ordering columns ("
                   + rowComparator.getOrderingColumns().stream().collect(Collectors.joining(", "))
                   + "), but different values in the rest of the columns:");
@@ -221,7 +221,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               + tn.getCanonicalName() + "'; only the first " + MAX_ORDERING_ERRORS + " were displayed.");
         }
         byte[] tableHash = h.close();
-        hashFile.add(Utl.toHex(tableHash), tn.getGenericName());
+        hashFile.add(Utl.toHex(tableHash), tn.getGenericName(), orderingErrors > 0);
         info("    " + DF.format(rowsCount) + " row(s) read");
       } catch (Throwable e) {
         e.printStackTrace(System.out);
@@ -412,6 +412,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
         for (int i = 0; i < this.numberOfColumns; i++) {
           boolean indf = isNotDistinctFrom(this.currentRow[i], this.previousRow[i]);
+//          System.out.println(">> comparing " + this.currentRow[i] + " and " + this.previousRow[i] + " --> " + indf);
           if (this.usedForOrdering[i]) {
             equalOrdering = equalOrdering && indf;
           } else {
@@ -432,6 +433,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     }
 
     public void next() {
+//      System.out.println("--next line");
       this.previousRow = this.currentRow;
       this.currentRow = new String[this.numberOfColumns];
     }
