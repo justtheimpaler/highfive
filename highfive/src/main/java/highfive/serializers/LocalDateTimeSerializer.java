@@ -21,12 +21,11 @@ public class LocalDateTimeSerializer extends Serializer<LocalDateTime> {
 
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
-    rs.getObject(ordinal); // deals with the DB2 JDBC driver that doesn't handle nulls properly
+    this.value = rs.getObject(ordinal, LocalDateTime.class);
     if (rs.wasNull()) {
       this.value = null;
       return null;
     }
-    this.value = rs.getObject(ordinal, LocalDateTime.class);
     LB.putLong(0, this.value.toEpochSecond(ZoneOffset.UTC));
     return LB.array();
   }

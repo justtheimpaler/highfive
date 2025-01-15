@@ -18,11 +18,11 @@ import highfive.model.Serializer;
 import highfive.model.Table;
 import highfive.serializers.BigDecimalSerializer;
 import highfive.serializers.ByteArraySerializer;
+import highfive.serializers.DB2LocalDateSerializer;
+import highfive.serializers.DB2LocalDateTimeSerializer;
+import highfive.serializers.DB2LocalTimeSerializer;
 import highfive.serializers.DoubleSerializer;
 import highfive.serializers.IntegerSerializer;
-import highfive.serializers.LocalDateSerializer;
-import highfive.serializers.LocalDateTimeSerializer;
-import highfive.serializers.LocalTimeSerializer;
 import highfive.serializers.LongSerializer;
 import highfive.serializers.StringSerializer;
 
@@ -137,11 +137,11 @@ public class DB2Dialect extends Dialect {
     } else if ("DECFLOAT".equals(type) || "REAL".equals(type) || "DOUBLE".equals(type)) {
       return new DoubleSerializer();
     } else if ("DATE".equals(type)) {
-      return new LocalDateSerializer();
+      return new DB2LocalDateSerializer();
     } else if ("TIME".equals(type)) {
-      return new LocalTimeSerializer();
+      return new DB2LocalTimeSerializer();
     } else if ("TIMESTAMP".equals(type)) {
-      return new LocalDateTimeSerializer();
+      return new DB2LocalDateTimeSerializer();
     } else if ("BLOB".equals(type)) {
       return new ByteArraySerializer();
     } else if ("XML".equals(type)) {

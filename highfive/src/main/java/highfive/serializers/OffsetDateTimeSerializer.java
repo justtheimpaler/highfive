@@ -20,12 +20,11 @@ public class OffsetDateTimeSerializer extends Serializer<OffsetDateTime> {
 
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
-    rs.getObject(ordinal); // deals with the DB2 JDBC driver that doesn't handle nulls properly
+    this.value = rs.getObject(ordinal, OffsetDateTime.class);
     if (rs.wasNull()) {
       this.value = null;
       return null;
     }
-    this.value = rs.getObject(ordinal, OffsetDateTime.class);
     LB.putLong(0, this.value.toEpochSecond());
     return LB.array();
   }

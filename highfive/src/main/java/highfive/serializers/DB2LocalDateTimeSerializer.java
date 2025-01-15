@@ -4,33 +4,35 @@ import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import highfive.model.Serializer;
 
-public class ZonedDateTimeSerializer extends Serializer<ZonedDateTime> {
+public class DB2LocalDateTimeSerializer extends Serializer<LocalDateTime> {
 
   private static ByteBuffer LB = ByteBuffer.allocate(Long.BYTES);
 
-  private ZonedDateTime value;
+  private LocalDateTime value;
 
-  public ZonedDateTimeSerializer() {
+  public DB2LocalDateTimeSerializer() {
     super(false);
   }
 
   @Override
   public byte[] read(ResultSet rs, int ordinal) throws SQLException {
-    this.value = rs.getObject(ordinal, ZonedDateTime.class);
+    rs.getObject(ordinal); // deals with the DB2 JDBC driver that doesn't handle nulls properly
     if (rs.wasNull()) {
       this.value = null;
       return null;
     }
-    LB.putLong(0, this.value.toEpochSecond());
+    this.value = rs.getObject(ordinal, LocalDateTime.class);
+    LB.putLong(0, this.value.toEpochSecond(ZoneOffset.UTC));
     return LB.array();
   }
 
   @Override
-  public ZonedDateTime getValue() {
+  public LocalDateTime getValue() {
     return this.value;
   }
 
