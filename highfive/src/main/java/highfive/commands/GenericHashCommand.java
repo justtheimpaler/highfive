@@ -32,6 +32,8 @@ import highfive.utils.Utl;
 
 public abstract class GenericHashCommand extends DataSourceCommand {
 
+  private static final int MAX_ORDERING_ERRORS = 3;
+
   protected HashFile hashFile;
 
   public GenericHashCommand(final String commandName, final String datasourceName)
@@ -119,11 +121,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
     info("  Hashing table: " + tn.renderSQL());
 
-//    info(">>> cols=" + t.getColumns().stream().map(c -> c.getCanonicalName()).collect(Collectors.joining(", ")));
-
     String names = t.getColumns().stream().map(c -> this.ds.getDialect().escapeIdentifierAsNeeded(c.getCanonicalName()))
         .collect(Collectors.joining(", "));
-//    info(">>> names=" + names);
 
     String selectOrdering = renderOrdering(t);
     RowComparator rowComparator = getRowComparator(t);
@@ -150,6 +149,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       try (ResultSet rs = ps.executeQuery();) {
         int logCount = 0;
         int rowsCount = 0;
+        int orderingErrors = 0;
         while (rs.next()) {
           if (this.ds.getLogHashingValues()) {
             info("    * Row #" + (rowsCount + 1) + ":");
@@ -195,20 +195,28 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           }
 
           boolean hasValidOrdering = rowComparator.hasValidOrdering();
-//          info("row " + rowsCount + ": hasValidOrdering=" + hasValidOrdering);
           if (!hasValidOrdering) {
-            error("Unpredictable hashing ordering found in table " + tn.getCanonicalName()
-                + "; found two rows with the same value in the ordering columns ("
-                + rowComparator.getOrderingColumns().stream().collect(Collectors.joining(", "))
-                + "), but different value in the non-ordering columns:");
-            error(" * Row 1: " + rowComparator.renderPreviousRow());
-            error(" * Row 2: " + rowComparator.renderCurrentRow());
-            error("-- skipping the table " + tn.getCanonicalName() + ".");
-            return;
+            orderingErrors++;
+            if (orderingErrors <= MAX_ORDERING_ERRORS) {
+              error("Non-deterministic hashing ordering found in table '" + tn.getCanonicalName() + "' ("
+                  + orderingErrors + "); found at least two rows with the same value in the ordering columns ("
+                  + rowComparator.getOrderingColumns().stream().collect(Collectors.joining(", "))
+                  + "), but different values in the rest of the columns:");
+              error(" * Row 1: " + rowComparator.renderPreviousRow());
+              error(" * Row 2: " + rowComparator.renderCurrentRow());
+            }
           }
 
           rowComparator.next();
 
+        }
+        if (orderingErrors > 0) {
+          error("The hashing computation won't be predictable for the table '" + tn.getCanonicalName()
+              + "' and can result in false positives or false negatives.");
+        }
+        if (orderingErrors > MAX_ORDERING_ERRORS) {
+          error("A total of " + orderingErrors + " non-deterministic hashing ordering issues were found in table '"
+              + tn.getCanonicalName() + "'; only the first " + MAX_ORDERING_ERRORS + " were displayed.");
         }
         byte[] tableHash = h.close();
         hashFile.add(Utl.toHex(tableHash), tn.getGenericName());
@@ -243,8 +251,6 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           } else {
             sb.append(", ");
           }
-//          info(">> col=" + c.getCanonicalName() + " -- c.getSerializer()=" + c.getSerializer()
-//              + " -- c.getSerializer().canUseACollation()=" + c.getSerializer().canUseACollation());
           String cm = this.ds.getDialect().escapeIdentifierAsNeeded(c.getCanonicalName());
           if (c.getSerializer().canUseACollation() && this.ds.getHashingCollation() != null) {
             cm = this.ds.getDialect().addCollation(cm, this.ds.getHashingCollation());
@@ -351,8 +357,6 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       }
     }
 
-//    info(">>>> orderingColumnsOrdinals=" + orderingColumnsOrdinals);
-
     return new RowComparator(columnNames, orderingColumnsOrdinals);
   }
 
@@ -382,7 +386,6 @@ public abstract class GenericHashCommand extends DataSourceCommand {
         this.previousRow[i] = null;
         this.currentRow[i] = null;
       }
-//      System.out.println("*** orderingColumnsOrdinals=" + orderingColumnsOrdinals);
 
       this.orderingColumns = orderingColumnsOrdinals.stream().map(o -> this.columnNames[o - 1])
           .collect(Collectors.toList());
@@ -407,15 +410,12 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
         for (int i = 0; i < this.numberOfColumns; i++) {
           boolean eq = this.currentRow[i].equals(this.previousRow[i]);
-//          System.out.println(" -- i=" + i + " - usedForOrdering=" + usedForOrdering[i] + " eq=" + eq);
           if (this.usedForOrdering[i]) {
             equalOrdering = equalOrdering && eq;
           } else {
             equalRest = equalRest && eq;
           }
         }
-
-//        System.out.println("equalOrdering=" + equalOrdering + " equalRest=" + equalRest);
 
         if (equalOrdering) {
           return equalRest;

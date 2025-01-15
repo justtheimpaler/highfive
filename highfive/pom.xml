@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.nocrala</groupId>
@@ -78,6 +80,18 @@
 
     <plugins>
 
+      <!-- Set the release tag to the version number only, and single versioning -->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.0-M1</version><!--$NO-MVN-MAN-VER$ -->
+        <configuration>
+          <tagNameFormat>@{project.version}</tagNameFormat>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+        </configuration>
+      </plugin>
+
       <!-- Embeds the project build information -->
 
       <plugin>
@@ -139,18 +153,6 @@
 
         <plugins>
 
-          <!-- Set the release tag to the version number only, and single versioning -->
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-release-plugin</artifactId>
-            <version>3.0.0-M1</version><!--$NO-MVN-MAN-VER$-->
-            <configuration>
-              <tagNameFormat>@{project.version}</tagNameFormat>
-              <autoVersionSubmodules>true</autoVersionSubmodules>
-            </configuration>
-          </plugin>
-
           <!-- Produce sources package - For Maven Central publishing -->
 
           <plugin>
@@ -166,7 +168,7 @@
               </execution>
             </executions>
           </plugin>
- 
+
           <!-- Produce the Javadocs package - For Maven Central publishing -->
 
           <plugin>
@@ -200,7 +202,8 @@
             </executions>
           </plugin>
 
-          <!-- Replaces "deploy" step with full Nexus Deploy + Close + Release on Maven Central -->
+          <!-- Replaces "deploy" step with full Nexus Deploy + Close + Release 
+            on Maven Central -->
 
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
