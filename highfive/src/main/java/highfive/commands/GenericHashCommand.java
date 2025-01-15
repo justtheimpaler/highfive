@@ -94,6 +94,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     } else {
 
       File f = new File(this.ds.getHashDumpFileName());
+
+      @SuppressWarnings("unused")
       HashDumpWriter hw = hashDumpConfig.getHashDumpWriter(f);
 
       Identifier tn = findTable(hashDumpConfig.getTableName(), tableNames);
@@ -159,7 +161,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           for (Column c : t.getColumns()) {
             try {
               bytes = c.getSerializer().read(rs, col);
-              String v = "" + c.getSerializer().getValue();
+              Object v = c.getSerializer().getValue();
               rowComparator.setColumn(col, v);
             } catch (SQLException e) {
               error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
@@ -395,8 +397,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       }
     }
 
-    public void setColumn(int ordinal, String value) {
-      this.currentRow[ordinal - 1] = value;
+    public void setColumn(int ordinal, Object value) {
+      this.currentRow[ordinal - 1] = value == null ? null : ("" + value);
     }
 
     public boolean hasValidOrdering() {
@@ -409,11 +411,11 @@ public abstract class GenericHashCommand extends DataSourceCommand {
         boolean equalRest = true;
 
         for (int i = 0; i < this.numberOfColumns; i++) {
-          boolean eq = this.currentRow[i].equals(this.previousRow[i]);
+          boolean indf = isNotDistinctFrom(this.currentRow[i], this.previousRow[i]);
           if (this.usedForOrdering[i]) {
-            equalOrdering = equalOrdering && eq;
+            equalOrdering = equalOrdering && indf;
           } else {
-            equalRest = equalRest && eq;
+            equalRest = equalRest && indf;
           }
         }
 
@@ -423,6 +425,10 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           return true;
         }
       }
+    }
+
+    private boolean isNotDistinctFrom(String a, String b) {
+      return a == null ? b == null : a.equals(b);
     }
 
     public void next() {
