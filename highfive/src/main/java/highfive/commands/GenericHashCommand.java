@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import highfive.commands.HashDumpCommand.HashDumpConfig;
+import highfive.commands.HashDumpWriter.NullHashDumpWriter;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -46,7 +47,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       NoSuchAlgorithmException, InvalidHashFileException, InvalidConfigurationException, IOException {
 
     List<Identifier> tableNames = this.ds.getDialect().listTablesNames();
-
+    info("hashDumpConfig=" + hashDumpConfig);
     if (hashDumpConfig == null) {
 
       // 1. Validate tables
@@ -85,7 +86,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       info(" ");
       info("Hashing:");
       for (Table t : tables) {
-        hashTable(t);
+        hashTable(t, new NullHashDumpWriter());
       }
 
       hashFile.saveTo(this.ds.getHashFileName());
@@ -95,16 +96,21 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
       File f = new File(this.ds.getHashDumpFileName());
 
-      @SuppressWarnings("unused")
-      HashDumpWriter hw = hashDumpConfig.getHashDumpWriter(f);
-
-      Identifier tn = findTable(hashDumpConfig.getTableName(), tableNames);
-      if (tn == null) {
-        throw new CouldNotHashException("Could not find the table '" + hashDumpConfig.getTableName() + "'");
+      try (HashDumpWriter hw = hashDumpConfig.getHashDumpWriter(f)) {
+        try {
+          Identifier tn = findTable(hashDumpConfig.getTableName(), tableNames);
+          if (tn == null) {
+            throw new CouldNotHashException("Could not find the table '" + hashDumpConfig.getTableName() + "'");
+          }
+          Table t = this.ds.getDialect().getTableMetaData(tn);
+          hashTable(t, hw);
+        } catch (RuntimeException e) {
+          throw new CouldNotHashException(e.getMessage());
+        }
+      } catch (Exception e1) {
+        e1.printStackTrace(System.out);
+        throw new CouldNotHashException("Could not save hashdump file.");
       }
-      Table t = this.ds.getDialect().getTableMetaData(tn);
-      hashTable(t);
-
     }
 
   }
@@ -118,7 +124,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     return null;
   }
 
-  private void hashTable(Table t) throws CouldNotHashException, NoSuchAlgorithmException, SQLException {
+  private void hashTable(Table t, HashDumpWriter hw)
+      throws CouldNotHashException, NoSuchAlgorithmException, SQLException {
     Identifier tn = t.getIdentifier();
 
     info("  Hashing table: " + tn.renderSQL());
@@ -210,6 +217,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           }
 
           rowComparator.next();
+          hw.write(rowsCount, h);
 
         }
         if (orderingErrors > 0) {
@@ -221,8 +229,11 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               + tn.getCanonicalName() + "'; only the first " + MAX_ORDERING_ERRORS + " were displayed.");
         }
         byte[] tableHash = h.close();
-        hashFile.add(Utl.toHex(tableHash), tn.getGenericName(), orderingErrors > 0);
+        if (this.hashFile != null) {
+          hashFile.add(Utl.toHex(tableHash), tn.getGenericName(), orderingErrors > 0);
+        }
         info("    " + DF.format(rowsCount) + " row(s) read");
+
       } catch (Throwable e) {
         e.printStackTrace(System.out);
         info("    Failed to read table " + tn.getGenericName() + " -- skipped");

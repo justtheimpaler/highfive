@@ -76,9 +76,10 @@ public class HighFive {
           System.exit(1);
         }
 
-//    0        1     2        3       4      5
-// -- hashdump <src> <table> [<start> <end> [<step>]]
-      } else if (args.length == 3 && "hashdump".equals(args[0])) {
+//    0     1     2        3       4      5
+// -- hashd <src> <table> [<start> <end> [<step>]]
+      } else if (args.length == 3 && "hashd".equals(args[0])) {
+        System.out.println("D1");
         try {
           HashDumpConfig config = HashDumpConfig.of(args[2]);
           Command c = new HashDumpCommand(args[1], config);
@@ -88,7 +89,8 @@ public class HighFive {
           error("Could not generate the hashdump: " + e.getMessage());
           System.exit(1);
         }
-      } else if (args.length == 5 && "hashdump".equals(args[0])) {
+      } else if (args.length == 5 && "hashd".equals(args[0])) {
+        System.out.println("D2");
         try {
           HashDumpConfig config = HashDumpConfig.of(args[2], args[3], args[4]);
           Command c = new HashDumpCommand(args[1], config);
@@ -98,7 +100,8 @@ public class HighFive {
           error("Could not generate the hashdump: " + e.getMessage());
           System.exit(1);
         }
-      } else if (args.length == 6 && "hashdump".equals(args[0])) {
+      } else if (args.length == 6 && "hashd".equals(args[0])) {
+        System.out.println("D3");
         try {
           HashDumpConfig config = HashDumpConfig.of(args[2], args[3], args[4], args[5]);
           Command c = new HashDumpCommand(args[1], config);

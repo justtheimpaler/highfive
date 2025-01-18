@@ -93,7 +93,7 @@ public class DataSource {
     this.selectFetchSize = selectFetchSize;
 
     this.hashFileName = name + ".hash";
-    this.hashDumpFileName = name + ".dumphash";
+    this.hashDumpFileName = name + ".hashdump";
 
     // 1. Load the JDBC driver jar file
 

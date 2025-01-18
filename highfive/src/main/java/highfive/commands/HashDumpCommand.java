@@ -22,7 +22,8 @@ public class HashDumpCommand extends GenericHashCommand {
 
   public HashDumpCommand(final String datasourceName, final HashDumpConfig hashDumpConfig)
       throws InvalidConfigurationException, SQLException, UnsupportedDatabaseTypeException {
-    super("Hash", datasourceName);
+    super("Hashdump", datasourceName);
+    this.hashDumpConfig = hashDumpConfig;
   }
 
   @Override
@@ -47,6 +48,7 @@ public class HashDumpCommand extends GenericHashCommand {
       this.start = start;
       this.end = end;
       this.step = step;
+      this.factory = factory;
     }
 
     public static HashDumpConfig of(String tableName) {
