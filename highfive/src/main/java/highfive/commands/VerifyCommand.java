@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
+import highfive.commands.HashConsumer.HashFileWriter;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -29,8 +30,15 @@ public class VerifyCommand extends GenericHashCommand {
       UnsupportedDatabaseTypeException, InvalidSchemaException, CouldNotHashException, InvalidConfigurationException {
 
     HashFile existing = HashFile.loadFrom(this.baselineFile);
-
-    super.hash(null);
+    HashFile hashFile;
+    
+    try (HashFileWriter hw = new HashFileWriter(this.ds.getHashFileName())) {
+      super.hashOneSchema(hw);
+      hashFile = hw.getHashFile();
+    } catch (Exception e) {
+      e.printStackTrace(System.out);
+      throw new CouldNotHashException(e.getMessage());
+    }
 
     info(" ");
     info("Verifying hashes:");

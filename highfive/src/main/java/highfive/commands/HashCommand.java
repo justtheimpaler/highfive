@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
+import highfive.commands.HashConsumer.HashFileWriter;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -22,7 +23,12 @@ public class HashCommand extends GenericHashCommand {
       throws NoSuchAlgorithmException, SQLException, UnsupportedDatabaseTypeException, InvalidSchemaException,
       CouldNotHashException, IOException, InvalidHashFileException, InvalidConfigurationException {
 
-    super.hash(null);
+    try (HashFileWriter hw = new HashFileWriter(this.ds.getHashFileName())) {
+      super.hashOneSchema(hw);
+    } catch (Exception e) {
+      e.printStackTrace(System.out);
+      throw new CouldNotHashException(e.getMessage());
+    }
 
   }
 

@@ -1,6 +1,5 @@
 package highfive.commands;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
@@ -14,8 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import highfive.commands.HashDumpCommand.HashDumpConfig;
-import highfive.commands.HashDumpWriter.NullHashDumpWriter;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -23,7 +20,6 @@ import highfive.exceptions.InvalidSchemaException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
 import highfive.exceptions.UnsupportedSQLFeatureException;
 import highfive.model.Column;
-import highfive.model.HashFile;
 import highfive.model.Hasher;
 import highfive.model.Identifier;
 import highfive.model.Table;
@@ -35,87 +31,64 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
   private static final int MAX_ORDERING_ERRORS = 3;
 
-  protected HashFile hashFile;
+//  @Deprecated
+//  protected HashFile hashFile;
 
   public GenericHashCommand(final String commandName, final String datasourceName)
       throws InvalidConfigurationException, SQLException, UnsupportedDatabaseTypeException {
     super(commandName, datasourceName);
   }
 
-  protected void hash(final HashDumpConfig hashDumpConfig)
+  protected void hashOneSchema(final HashConsumer hc)
       throws SQLException, UnsupportedDatabaseTypeException, InvalidSchemaException, CouldNotHashException,
       NoSuchAlgorithmException, InvalidHashFileException, InvalidConfigurationException, IOException {
 
     List<Identifier> tableNames = this.ds.getDialect().listTablesNames();
-    info("hashDumpConfig=" + hashDumpConfig);
-    if (hashDumpConfig == null) {
+//    info("hashDumpConfig=" + hashDumpConfig);
+//    if (hashDumpConfig == null) {
 
-      // 1. Validate tables
+    // 1. Validate tables
 
-      this.hashFile = new HashFile();
+    if (!this.ds.getTableFilter().allTablesFound()) {
+      throw new CouldNotHashException("Could not find the following tables declared in the property '"
+          + this.ds.getName() + ".table.filter': " + this.ds.getTableFilter().listNotAccepted().stream()
+              .map(n -> n.toString()).collect(Collectors.joining(", ")));
+    }
 
-      if (!this.ds.getTableFilter().allTablesFound()) {
-        throw new CouldNotHashException("Could not find the following tables declared in the property '"
-            + this.ds.getName() + ".table.filter': " + this.ds.getTableFilter().listNotAccepted().stream()
-                .map(n -> n.toString()).collect(Collectors.joining(", ")));
-      }
-
-      List<Table> tables = new ArrayList<>();
-      for (Identifier tn : tableNames) {
-        Table t = this.ds.getDialect().getTableMetaData(tn);
-        tables.add(t);
-        String ro = renderOrdering(t);
-        if (ro == null) {
-          throw new CouldNotHashException(
-              "  - Table " + tn.getCanonicalName() + " does not have a sorting order for hashing. "
-                  + "Add a primary key or declare a unique criteria for ordering using the property '"
-                  + this.ds.getName() + ".hashing.ordering'.");
-        }
-      }
-
-      // 2. Display Row Count
-
-      displayRowCount(tables);
-
-      // 3. Check Hashing Preconditions
-
-      checkIfHashingAndCopyingIsSupported(tables);
-
-      // 4. Hash the schema
-
-      info(" ");
-      info("Hashing:");
-      for (Table t : tables) {
-        hashTable(t, new NullHashDumpWriter());
-      }
-
-      hashFile.saveTo(this.ds.getHashFileName());
-      info("  Data hashes generated to: " + this.ds.getHashFileName());
-
-    } else {
-
-      File f = new File(this.ds.getHashDumpFileName());
-
-      try (HashDumpWriter hw = hashDumpConfig.getHashDumpWriter(f)) {
-        try {
-          Identifier tn = findTable(hashDumpConfig.getTableName(), tableNames);
-          if (tn == null) {
-            throw new CouldNotHashException("Could not find the table '" + hashDumpConfig.getTableName() + "'");
-          }
-          Table t = this.ds.getDialect().getTableMetaData(tn);
-          hashTable(t, hw);
-        } catch (RuntimeException e) {
-          throw new CouldNotHashException(e.getMessage());
-        }
-      } catch (Exception e1) {
-        e1.printStackTrace(System.out);
-        throw new CouldNotHashException("Could not save hashdump file.");
+    List<Table> tables = new ArrayList<>();
+    for (Identifier tn : tableNames) {
+      Table t = this.ds.getDialect().getTableMetaData(tn);
+      tables.add(t);
+      String ro = renderOrdering(t);
+      if (ro == null) {
+        throw new CouldNotHashException(
+            "  - Table " + tn.getCanonicalName() + " does not have a sorting order for hashing. "
+                + "Add a primary key or declare a unique criteria for ordering using the property '" + this.ds.getName()
+                + ".hashing.ordering'.");
       }
     }
 
+    // 2. Display Row Count
+
+    displayRowCount(tables);
+
+    // 3. Check Hashing Preconditions
+
+    checkIfHashingAndCopyingIsSupported(tables);
+
+    // 4. Hash the schema
+
+    info(" ");
+    info("Hashing:");
+    for (Table t : tables) {
+      hashOneTable(t, hc);
+    }
+
+    info("  Data hashes generated to: " + this.ds.getHashFileName());
+
   }
 
-  private Identifier findTable(String tableName, List<Identifier> tableNames) {
+  protected Identifier findTable(String tableName, List<Identifier> tableNames) {
     for (Identifier tn : tableNames) {
       if (tn.getGenericName().equals(tableName)) {
         return tn;
@@ -124,7 +97,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     return null;
   }
 
-  private void hashTable(Table t, HashDumpWriter hw)
+  protected void hashOneTable(Table t, HashConsumer hc)
       throws CouldNotHashException, NoSuchAlgorithmException, SQLException {
     Identifier tn = t.getIdentifier();
 
@@ -157,11 +130,14 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
       try (ResultSet rs = ps.executeQuery();) {
         int logCount = 0;
-        int rowsCount = 0;
+        int line = 0;
         int orderingErrors = 0;
-        while (rs.next()) {
+        boolean active = true;
+
+        while (rs.next() && active) {
+
           if (this.ds.getLogHashingValues()) {
-            info("    * Row #" + (rowsCount + 1) + ":");
+            info("    * Row #" + (line + 1) + ":");
           }
           int col = 1;
           byte[] bytes = null;
@@ -173,12 +149,12 @@ public abstract class GenericHashCommand extends DataSourceCommand {
             } catch (SQLException e) {
               error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
                   + tn.getCanonicalName() + "' as a '" + c.getSerializer().getName()
-                  + "' value. The error happened in row #" + DF.format(rowsCount + 1)
+                  + "' value. The error happened in row #" + DF.format(line + 1)
                   + " when the table is sorted by the columns: " + selectOrdering + ".");
               throw e;
             } catch (RuntimeException e) {
               error("Could not serialize the value for column '" + c.getCanonicalName() + "' on table '"
-                  + tn.getCanonicalName() + "'. The error happened in row #" + DF.format(rowsCount + 1)
+                  + tn.getCanonicalName() + "'. The error happened in row #" + DF.format(line + 1)
                   + " when the table is sorted by the columns: " + selectOrdering + ". Is '"
                   + c.getSerializer().getClass().getSimpleName() + "' the correct serializer for this column?");
               throw e;
@@ -192,12 +168,12 @@ public abstract class GenericHashCommand extends DataSourceCommand {
             col++;
           }
           logCount++;
-          rowsCount++;
+          line++;
           if (logCount >= 100000) {
-            info("    " + DF.format(rowsCount) + " rows read");
+            info("    " + DF.format(line) + " rows read");
             logCount = 0;
           }
-          if (ds.getMaxRows() != null && rowsCount >= ds.getMaxRows()) {
+          if (ds.getMaxRows() != null && line >= ds.getMaxRows()) {
             info("    - Limit of " + ds.getMaxRows()
                 + " rows (max.rows) reached when reading this table -- moving on to the next table.");
             break;
@@ -217,9 +193,11 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           }
 
           rowComparator.next();
-          hw.write(rowsCount, h);
+          active = hc.consume(line, h);
+          info("-- Consumed line #" + line + " - active=" + active);
 
         }
+
         if (orderingErrors > 0) {
           error("The hashing computation won't be predictable for the table '" + tn.getCanonicalName()
               + "' and can result in false positives or false negatives.");
@@ -228,11 +206,11 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           error("A total of " + orderingErrors + " non-deterministic hashing ordering issues were found in table '"
               + tn.getCanonicalName() + "'; only the first " + MAX_ORDERING_ERRORS + " were displayed.");
         }
-        byte[] tableHash = h.close();
-        if (this.hashFile != null) {
-          hashFile.add(Utl.toHex(tableHash), tn.getGenericName(), orderingErrors > 0);
-        }
-        info("    " + DF.format(rowsCount) + " row(s) read");
+
+//        info(">> will close entry: " + t.getIdentifier().getGenericName());
+        hc.closeEntry(t.getIdentifier().getGenericName(), orderingErrors > 0);
+
+        info("    " + DF.format(line) + " row(s) read");
 
       } catch (Throwable e) {
         e.printStackTrace(System.out);

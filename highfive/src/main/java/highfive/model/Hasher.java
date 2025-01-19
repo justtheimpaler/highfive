@@ -3,6 +3,8 @@ package highfive.model;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import highfive.utils.Utl;
+
 public class Hasher {
 
   private static final byte[] NULL = { 123 };
@@ -25,6 +27,10 @@ public class Hasher {
   public byte[] getInProgressDigest() throws CloneNotSupportedException {
     MessageDigest c = (MessageDigest) this.digest.clone();
     return c.digest();
+  }
+
+  public boolean same(String other) throws CloneNotSupportedException {
+    return Utl.toHex(getInProgressDigest()).equals(other);
   }
 
   public byte[] close() {

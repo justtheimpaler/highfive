@@ -4,16 +4,20 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.List;
 
-import highfive.commands.HashDumpWriter.FullHashDumpWriterFactory;
-import highfive.commands.HashDumpWriter.HashDumpWriterFactory;
-import highfive.commands.HashDumpWriter.RangeHashDumpWriterFactory;
-import highfive.commands.HashDumpWriter.SteppedHashDumpWriterFactory;
+import highfive.commands.HashConsumer.FullHashDumpWriterFactory;
+import highfive.commands.HashConsumer.HashDumpComparatorFactory;
+import highfive.commands.HashConsumer.HashDumpWriterFactory;
+import highfive.commands.HashConsumer.RangeHashDumpWriterFactory;
+import highfive.commands.HashConsumer.SteppedHashDumpWriterFactory;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
 import highfive.exceptions.InvalidSchemaException;
 import highfive.exceptions.UnsupportedDatabaseTypeException;
+import highfive.model.Identifier;
+import highfive.model.Table;
 import highfive.utils.Utl;
 
 public class HashDumpCommand extends GenericHashCommand {
@@ -31,7 +35,22 @@ public class HashDumpCommand extends GenericHashCommand {
       throws NoSuchAlgorithmException, SQLException, UnsupportedDatabaseTypeException, InvalidSchemaException,
       CouldNotHashException, IOException, InvalidHashFileException, InvalidConfigurationException {
 
-    super.hash(this.hashDumpConfig);
+    List<Identifier> tableNames = this.ds.getDialect().listTablesNames();
+    Identifier tn = findTable(hashDumpConfig.getTableName(), tableNames);
+    if (tn == null) {
+      throw new CouldNotHashException("Could not find the table '" + hashDumpConfig.getTableName() + "'");
+    }
+    Table t = this.ds.getDialect().getTableMetaData(tn);
+
+    File f = new File(this.ds.getHashDumpFileName());
+
+    try (HashConsumer hc = hashDumpConfig.getHashConsumer(f)) {
+      info("-- CONSUMER: " + hc);
+      super.hashOneTable(t, hc);
+    } catch (Exception e) {
+      e.printStackTrace(System.out);
+      throw new CouldNotHashException(e.getMessage());
+    }
 
   }
 
@@ -56,6 +75,13 @@ public class HashDumpCommand extends GenericHashCommand {
         throw new RuntimeException("The hashdump command requires a non-empty table name.");
       }
       return new HashDumpConfig(tableName, null, null, null, new FullHashDumpWriterFactory());
+    }
+
+    public static HashDumpConfig forCompare(String tableName, String dumpFile) {
+      if (Utl.empty(tableName)) {
+        throw new RuntimeException("The hashdump command requires a non-empty table name.");
+      }
+      return new HashDumpConfig(tableName, null, null, null, new HashDumpComparatorFactory());
     }
 
     public static HashDumpConfig of(String tableName, String start, String end) {
@@ -128,7 +154,7 @@ public class HashDumpCommand extends GenericHashCommand {
       return st;
     }
 
-    public HashDumpWriter getHashDumpWriter(File f) throws IOException {
+    public HashConsumer getHashConsumer(File f) throws IOException {
       return this.factory.getInstance(this, f);
     }
 

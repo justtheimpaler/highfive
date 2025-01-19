@@ -76,8 +76,8 @@ public class HighFive {
           System.exit(1);
         }
 
-//    0     1     2        3       4      5
-// -- hashd <src> <table> [<start> <end> [<step>]]
+//    0     1    2        3       4      5
+// -- hashd <ds> <table> [<start> <end> [<step>]]
       } else if (args.length == 3 && "hashd".equals(args[0])) {
         System.out.println("D1");
         try {
@@ -104,6 +104,19 @@ public class HighFive {
         System.out.println("D3");
         try {
           HashDumpConfig config = HashDumpConfig.of(args[2], args[3], args[4], args[5]);
+          Command c = new HashDumpCommand(args[1], config);
+          c.run();
+          System.exit(0);
+        } catch (ApplicationException e) {
+          error("Could not generate the hashdump: " + e.getMessage());
+          System.exit(1);
+        }
+
+        // -- 0---- 1--- 2------ 3
+        // -- hashc <ds> <table> <dump-file>
+      } else if (args.length == 4 && "hashc".equals(args[0])) {
+        try {
+          HashDumpConfig config = HashDumpConfig.forCompare(args[2], args[3]);
           Command c = new HashDumpCommand(args[1], config);
           c.run();
           System.exit(0);
