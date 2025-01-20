@@ -6,11 +6,13 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.List;
 
-import highfive.commands.HashConsumer.FullHashDumpWriterFactory;
-import highfive.commands.HashConsumer.HashDumpComparatorFactory;
-import highfive.commands.HashConsumer.HashDumpWriterFactory;
-import highfive.commands.HashConsumer.RangeHashDumpWriterFactory;
-import highfive.commands.HashConsumer.SteppedHashDumpWriterFactory;
+import highfive.commands.consumer.HashConsumer;
+import highfive.commands.consumer.HashConsumer.ExecutionStatus;
+import highfive.commands.consumer.HashDumpWriterFactory;
+import highfive.commands.consumer.HashDumpWriterFactory.FullHashDumpWriterFactory;
+import highfive.commands.consumer.HashDumpWriterFactory.HashDumpComparatorFactory;
+import highfive.commands.consumer.HashDumpWriterFactory.RangeHashDumpWriterFactory;
+import highfive.commands.consumer.HashDumpWriterFactory.SteppedHashDumpWriterFactory;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -47,6 +49,11 @@ public class HashDumpCommand extends GenericHashCommand {
     try (HashConsumer hc = hashDumpConfig.getHashConsumer(f)) {
       info("-- CONSUMER: " + hc);
       super.hashOneTable(t, hc);
+      ExecutionStatus status = hc.getStatus();
+      if (!status.successful()) {
+//        System.out.println(status.getErrorMessage());
+        error(status.getErrorMessage());
+      }
     } catch (Exception e) {
       e.printStackTrace(System.out);
       throw new CouldNotHashException(e.getMessage());
@@ -77,11 +84,11 @@ public class HashDumpCommand extends GenericHashCommand {
       return new HashDumpConfig(tableName, null, null, null, new FullHashDumpWriterFactory());
     }
 
-    public static HashDumpConfig forCompare(String tableName, String dumpFile) {
+    public static HashDumpConfig forCompare(String tableName, String baseline) {
       if (Utl.empty(tableName)) {
         throw new RuntimeException("The hashdump command requires a non-empty table name.");
       }
-      return new HashDumpConfig(tableName, null, null, null, new HashDumpComparatorFactory());
+      return new HashDumpConfig(tableName, null, null, null, new HashDumpComparatorFactory(new File(baseline)));
     }
 
     public static HashDumpConfig of(String tableName, String start, String end) {

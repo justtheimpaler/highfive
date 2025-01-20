@@ -29,8 +29,8 @@ public class Hasher {
     return c.digest();
   }
 
-  public boolean same(String other) throws CloneNotSupportedException {
-    return Utl.toHex(getInProgressDigest()).equals(other);
+  public String getCurrentHash() throws CloneNotSupportedException {
+    return Utl.toHex(getInProgressDigest());
   }
 
   public byte[] close() {

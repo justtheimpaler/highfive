@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 import highfive.commands.HashDumpCommand.HashDumpConfig;
+import highfive.commands.consumer.HashConsumer;
+import highfive.commands.consumer.HashConsumer.ExecutionStatus;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -40,8 +42,14 @@ public class HashCompareCommand extends GenericHashCommand {
     File f = new File(this.ds.getHashDumpFileName());
 
     try (HashConsumer hc = hashDumpConfig.getHashConsumer(f)) {
-      info("-- CONSUMER: " + hc);
+//      info("-- CONSUMER 1: " + hc);
       super.hashOneTable(t, hc);
+      ExecutionStatus status = hc.getStatus();
+      if (!status.successful()) {
+//        System.out.println(status.getErrorMessage());
+        error(status.getErrorMessage());
+      }
+
     } catch (Exception e) {
       e.printStackTrace(System.out);
       throw new CouldNotHashException(e.getMessage());

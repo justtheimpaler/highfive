@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import highfive.commands.Command;
 import highfive.commands.CopyCommand;
 import highfive.commands.HashCommand;
+import highfive.commands.HashCompareCommand;
 import highfive.commands.HashDumpCommand;
 import highfive.commands.HashDumpCommand.HashDumpConfig;
 import highfive.commands.HashDupesCommand;
@@ -113,11 +114,11 @@ public class HighFive {
         }
 
         // -- 0---- 1--- 2------ 3
-        // -- hashc <ds> <table> <dump-file>
+        // -- hashc <ds> <table> <baseline-file>
       } else if (args.length == 4 && "hashc".equals(args[0])) {
         try {
           HashDumpConfig config = HashDumpConfig.forCompare(args[2], args[3]);
-          Command c = new HashDumpCommand(args[1], config);
+          Command c = new HashCompareCommand(args[1], config);
           c.run();
           System.exit(0);
         } catch (ApplicationException e) {

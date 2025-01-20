@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import highfive.commands.consumer.HashConsumer;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
 import highfive.exceptions.InvalidHashFileException;
@@ -194,7 +195,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
           rowComparator.next();
           active = hc.consume(line, h);
-          info("-- Consumed line #" + line + " - active=" + active);
+//          info("-- Consumed line #" + line + " - active=" + active);
 
         }
 
