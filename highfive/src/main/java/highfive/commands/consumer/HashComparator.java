@@ -13,52 +13,75 @@ public class HashComparator implements HashConsumer {
 
   private static final Logger log = Logger.getLogger(HashComparator.class.getName());
 
+  private File baseline;
   private BufferedReader r;
 
+  private long lineNo;
   private boolean eof;
+
   private String hash;
-  private long line;
+  private long baselineRow;
 
   private ExecutionStatus status;
 
   public HashComparator(String tableName, File baseline, File current) throws IOException {
+    log.fine("init");
+    this.baseline = baseline;
+    this.lineNo = 0;
     this.eof = false;
     this.status = null;
     this.r = new BufferedReader(new FileReader(baseline));
-    readCommentLine(); // skip the first line since it's a comment
-    readLine();
+    readInitialComment(); // skip the first line since it's a comment
+    nextBaseline();
   }
+  
+  
 
-  private void readCommentLine() throws IOException {
-//    log.info("readCommentLine() eof=" + this.eof);
-    if (!this.eof) {
-      this.r.readLine();
+  private void readInitialComment() throws IOException {
+    String txt = this.r.readLine();
+    if (txt == null) {
+      this.eof = true;
+      this.status = ExecutionStatus.failure(
+          "Could not read the baseline file '" + this.baseline + "'; it does not have the first comment line.");
     }
+    this.lineNo++;
   }
 
-  private void readLine() throws IOException {
-//    log.info("readLine() eof=" + this.eof);
-    if (!this.eof) {
+  private void nextBaseline() throws IOException {
+    if (this.status != null) {
+      return;
+    }
+    if (this.eof) {
+      this.status = ExecutionStatus
+          .failure("Could not read the baseline file '" + this.baseline + "'; end of file already reached.");
+    } else {
       String txt = this.r.readLine();
-//      log.info(" -- baseline: " + txt);
-      if (txt == null || txt.length() < 64 + 1 + 1) {
-//        log.info(" --> fail");
+      if (txt == null) {
+        this.hash = null;
+        this.baselineRow = -1;
         this.eof = true;
       } else {
-        this.hash = txt.substring(0, 64);
-//        String sep = txt.substring(64, 65);
-        this.line = Long.parseLong(txt.substring(65));
-//        log.info(" --> baseline #" + this.line + " hash=" + this.hash);
+        this.lineNo++;
+        if (txt.length() < 64 + 1 + 1) {
+          this.hash = null;
+          this.baselineRow = -1;
+          this.status = ExecutionStatus.failure("Could not read the baseline file '" + this.baseline
+              + "'; Invalid format of line #" + this.lineNo + ": " + txt);
+        } else {
+          this.hash = txt.substring(0, 64);
+          this.baselineRow = Long.parseLong(txt.substring(65));
+        }
       }
     }
   }
 
   @Override
-  public boolean consume(int line, Hasher hasher) throws IOException, CloneNotSupportedException {
-//    log.info("CONSUME #" + line);
-    while (line > this.line && !this.eof) {
-//      log.info("CONSUME advance");
-      readLine();
+  public boolean consume(int liveRow, Hasher hasher) throws IOException, CloneNotSupportedException {
+    if (this.status != null) {
+      return false;
+    }
+    while (liveRow > this.baselineRow && !this.eof) {
+      nextBaseline();
     }
     if (this.eof) {
 //      log.info("CONSUME eof");
@@ -66,7 +89,7 @@ public class HashComparator implements HashConsumer {
       return false;
     }
 
-    if (line < this.line) {
+    if (liveRow < this.baselineRow) {
 //      log.info("CONSUME stepped over");
       return true;
     } else { // line == this.line
@@ -74,7 +97,7 @@ public class HashComparator implements HashConsumer {
 //      log.info(" -- computed " + computed);
       if (!computed.equals(this.hash)) {
 //        log.info("CONSUME compare FAIL");
-        this.status = ExecutionStatus.failure("Hash dump comparison failed: found different hashes in row #" + line
+        this.status = ExecutionStatus.failure("Hash dump comparison failed: found different hashes in row #" + liveRow
             + " -- current hash: " + computed + " -- baseline hash: " + this.hash);
 //        error("############################## Found different hash on line #" + line);
         return false;
