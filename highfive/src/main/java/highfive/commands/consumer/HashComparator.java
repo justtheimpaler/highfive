@@ -24,33 +24,36 @@ public class HashComparator implements HashConsumer {
     log.fine("init");
     this.baseline = baseline;
     this.r = new DumpFileReader(baseline);
-    this.eof = !this.r.next();
+    this.eof = false;
   }
 
   @Override
-  public boolean consume(int liveRow, Hasher hasher) throws IOException, CloneNotSupportedException {
+  public boolean consume(int liveRow, Hasher hasher)
+      throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException {
     if (this.status != null) {
       return false;
     }
-    while (liveRow > this.baselineRow && !this.eof) {
-      nextBaseline();
+    while (!this.eof && (r.atStart() || r.getRow() < liveRow)) {
+      if (!r.next()) {
+        this.eof = true;
+      }
     }
     if (this.eof) {
-//      log.info("CONSUME eof");
-      error("Dump file end reached.");
+      this.status = ExecutionStatus.failure(
+          "The end of the baseline file was reached and could not find the hash for the database row #" + liveRow);
       return false;
     }
 
-    if (liveRow < this.baselineRow) {
+    if (r.getRow() > liveRow) {
 //      log.info("CONSUME stepped over");
       return true;
     } else { // line == this.line
-      String computed = hasher.getCurrentHash();
+      String liveHash = hasher.getOngoingHash();
 //      log.info(" -- computed " + computed);
-      if (!computed.equals(this.hash)) {
+      if (!liveHash.equals(r.getHash())) {
 //        log.info("CONSUME compare FAIL");
         this.status = ExecutionStatus.failure("Hash dump comparison failed: found different hashes in row #" + liveRow
-            + " -- current hash: " + computed + " -- baseline hash: " + this.hash);
+            + " -- current hash: " + liveHash + " -- baseline hash: " + r.getHash());
 //        error("############################## Found different hash on line #" + line);
         return false;
       }
@@ -68,7 +71,7 @@ public class HashComparator implements HashConsumer {
   @Override
   public void close() throws Exception {
 //    log.info("CLOSE: this.eof=" + this.eof);
-    String s = this.r.readLine();
+//    String s = this.r.readLine();
 //    log.info("CLOSE: s=" + s);
 
     this.r.close();
@@ -77,10 +80,6 @@ public class HashComparator implements HashConsumer {
   @Override
   public ExecutionStatus getStatus() {
     return this.status;
-  }
-
-  private void error(String txt) {
-    System.out.println("ERROR " + txt);
   }
 
 }

@@ -20,8 +20,8 @@ public class DumpFileReader {
   private boolean eof;
   private boolean error;
 
-  private String hash;
   private long row;
+  private String hash;
 
   public DumpFileReader(File f) throws InvalidDumpFileException, DumpFileIOException {
     log.fine("init");
@@ -29,6 +29,8 @@ public class DumpFileReader {
     this.lineNo = 0;
     this.eof = false;
     this.error = false;
+    this.row = -1;
+    this.hash = null;
     try {
       this.r = new BufferedReader(new FileReader(this.f));
       this.metadata = readHeader();
@@ -230,6 +232,10 @@ public class DumpFileReader {
     return metadata;
   }
 
+  public boolean atStart() {
+    return this.lineNo == 0;
+  }
+
   public long getRow() {
     return row;
   }
@@ -258,6 +264,10 @@ public class DumpFileReader {
       super(cause);
     }
 
+  }
+
+  public void close() throws IOException {
+    this.r.close();
   }
 
 }

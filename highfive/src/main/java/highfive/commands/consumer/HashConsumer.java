@@ -2,12 +2,15 @@ package highfive.commands.consumer;
 
 import java.io.IOException;
 
+import highfive.commands.consumer.DumpFileReader.DumpFileIOException;
+import highfive.commands.consumer.DumpFileReader.InvalidDumpFileException;
 import highfive.exceptions.InvalidHashFileException;
 import highfive.model.Hasher;
 
 public interface HashConsumer extends AutoCloseable {
 
-  boolean consume(int line, Hasher hasher) throws IOException, CloneNotSupportedException;
+  boolean consume(int line, Hasher hasher)
+      throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException;
 
   void closeEntry(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException;
 

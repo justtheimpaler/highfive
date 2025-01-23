@@ -29,7 +29,7 @@ public class Hasher {
     return c.digest();
   }
 
-  public String getCurrentHash() throws CloneNotSupportedException {
+  public String getOngoingHash() throws CloneNotSupportedException {
     return Utl.toHex(getInProgressDigest());
   }
 
