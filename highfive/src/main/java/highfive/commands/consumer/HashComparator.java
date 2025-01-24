@@ -13,18 +13,21 @@ public class HashComparator implements HashConsumer {
 
   private static final Logger log = Logger.getLogger(HashComparator.class.getName());
 
+  private String tableName;
+  @SuppressWarnings("unused")
   private File baseline;
-  private DumpFileReader r;
-  private boolean eof;
+  private DumpFileReader b;
+  private boolean beof;
 
   private ExecutionStatus status;
 
   public HashComparator(String tableName, File baseline, File current)
       throws InvalidDumpFileException, DumpFileIOException {
     log.fine("init");
+    this.tableName = tableName;
     this.baseline = baseline;
-    this.r = new DumpFileReader(baseline);
-    this.eof = false;
+    this.b = new DumpFileReader(baseline);
+    this.beof = false;
   }
 
   @Override
@@ -33,48 +36,52 @@ public class HashComparator implements HashConsumer {
     if (this.status != null) {
       return false;
     }
-    while (!this.eof && (r.atStart() || r.getRow() < liveRow)) {
-      if (!r.next()) {
-        this.eof = true;
-      }
+    while (!this.beof && (b.atStart() || b.getRow() < liveRow)) {
+      nextBaseline();
     }
-    if (this.eof) {
-      this.status = ExecutionStatus.failure(
-          "The end of the baseline file was reached and could not find the hash for the database row #" + liveRow);
+    if (this.beof) {
+      this.status = ExecutionStatus.failure("Found more rows in the live table '" + this.tableName
+          + "' than in the baseline file; no matching baseline hash for live row #" + liveRow);
       return false;
     }
 
-    if (r.getRow() > liveRow) {
-//      log.info("CONSUME stepped over");
+    if (b.getRow() > liveRow) {
       return true;
     } else { // line == this.line
       String liveHash = hasher.getOngoingHash();
-//      log.info(" -- computed " + computed);
-      if (!liveHash.equals(r.getHash())) {
-//        log.info("CONSUME compare FAIL");
-        this.status = ExecutionStatus.failure("Hash dump comparison failed: found different hashes in row #" + liveRow
-            + " -- current hash: " + liveHash + " -- baseline hash: " + r.getHash());
-//        error("############################## Found different hash on line #" + line);
+      if (!liveHash.equals(b.getHash())) {
+        this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '"
+            + this.tableName + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash());
+        nextBaseline();
         return false;
       }
-//      log.info("CONSUME compare SUCCESS");
+      nextBaseline();
       return true;
     }
+  }
 
+  private void nextBaseline() throws InvalidDumpFileException, DumpFileIOException {
+    if (!b.next()) {
+      this.beof = true;
+    }
   }
 
   @Override
   public void closeEntry(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException {
-    // Nothing to do
+    if (this.status != null) {
+      return;
+    }
+    if (!this.beof) {
+      this.status = ExecutionStatus.failure("Found more rows in the baseline file than in the live table '"
+          + this.tableName + "'; the table does not a row #" + b.getRow());
+    } else {
+      this.status = ExecutionStatus.success();
+    }
   }
 
   @Override
   public void close() throws Exception {
-//    log.info("CLOSE: this.eof=" + this.eof);
-//    String s = this.r.readLine();
-//    log.info("CLOSE: s=" + s);
-
-    this.r.close();
+    this.b.close();
   }
 
   @Override

@@ -23,7 +23,7 @@ public class HashCompareCommand extends GenericHashCommand {
 
   public HashCompareCommand(final String datasourceName, final HashDumpConfig hashDumpConfig)
       throws InvalidConfigurationException, SQLException, UnsupportedDatabaseTypeException {
-    super("Hash Compare", datasourceName);
+    super("Hash Dump Compare", datasourceName);
     this.hashDumpConfig = hashDumpConfig;
   }
 
@@ -31,6 +31,8 @@ public class HashCompareCommand extends GenericHashCommand {
   public void execute()
       throws NoSuchAlgorithmException, SQLException, UnsupportedDatabaseTypeException, InvalidSchemaException,
       CouldNotHashException, IOException, InvalidHashFileException, InvalidConfigurationException {
+
+    info("");
 
     List<Identifier> tableNames = this.ds.getDialect().listTablesNames();
     Identifier tn = findTable(hashDumpConfig.getTableName(), tableNames);
@@ -42,12 +44,13 @@ public class HashCompareCommand extends GenericHashCommand {
     File f = new File(this.ds.getHashDumpFileName());
 
     try (HashConsumer hc = hashDumpConfig.getHashConsumer(f)) {
-//      info("-- CONSUMER 1: " + hc);
       super.hashOneTable(t, hc);
       ExecutionStatus status = hc.getStatus();
-      if (!status.successful()) {
-//        System.out.println(status.getErrorMessage());
-        error(status.getErrorMessage());
+      if (status.successful()) {
+        info("Hash dump comparison successful -- The live table '" + hashDumpConfig.getTableName()
+            + "' fully matches the baseline dump file.");
+      } else {
+        error("Hash dump comparison failed -- " + status.getErrorMessage());
       }
 
     } catch (Exception e) {

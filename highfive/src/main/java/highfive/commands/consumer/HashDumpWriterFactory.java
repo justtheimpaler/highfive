@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.IOException;
 
 import highfive.commands.HashDumpCommand.HashDumpConfig;
+import highfive.commands.consumer.DumpFileReader.DumpFileIOException;
+import highfive.commands.consumer.DumpFileReader.InvalidDumpFileException;
 
 public interface HashDumpWriterFactory {
 
-  public HashConsumer getInstance(HashDumpConfig config, File f) throws IOException;
+  public HashConsumer getInstance(HashDumpConfig config, File f)
+      throws IOException, InvalidDumpFileException, DumpFileIOException;
 
   public static class HashDumpComparatorFactory implements HashDumpWriterFactory {
 
@@ -18,7 +21,8 @@ public interface HashDumpWriterFactory {
     }
 
     @Override
-    public HashConsumer getInstance(HashDumpConfig config, File current) throws IOException {
+    public HashConsumer getInstance(HashDumpConfig config, File current)
+        throws IOException, InvalidDumpFileException, DumpFileIOException {
       return new HashComparator(config.getTableName(), this.baseline, current);
     }
 

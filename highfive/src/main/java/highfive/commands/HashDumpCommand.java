@@ -6,6 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.List;
 
+import highfive.commands.consumer.DumpFileReader.DumpFileIOException;
+import highfive.commands.consumer.DumpFileReader.InvalidDumpFileException;
 import highfive.commands.consumer.HashConsumer;
 import highfive.commands.consumer.HashConsumer.ExecutionStatus;
 import highfive.commands.consumer.HashDumpWriterFactory;
@@ -161,7 +163,7 @@ public class HashDumpCommand extends GenericHashCommand {
       return st;
     }
 
-    public HashConsumer getHashConsumer(File f) throws IOException {
+    public HashConsumer getHashConsumer(File f) throws IOException, InvalidDumpFileException, DumpFileIOException {
       return this.factory.getInstance(this, f);
     }
 
