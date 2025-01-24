@@ -49,11 +49,9 @@ public class HashDumpCommand extends GenericHashCommand {
     File f = new File(this.ds.getHashDumpFileName());
 
     try (HashConsumer hc = hashDumpConfig.getHashConsumer(f)) {
-      info("-- CONSUMER: " + hc);
       super.hashOneTable(t, hc);
       ExecutionStatus status = hc.getStatus();
       if (!status.successful()) {
-//        System.out.println(status.getErrorMessage());
         error(status.getMessage());
       }
     } catch (Exception e) {

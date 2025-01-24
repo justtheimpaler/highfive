@@ -9,7 +9,7 @@ import highfive.model.Hasher;
 
 public interface HashConsumer extends AutoCloseable {
 
-  boolean consume(int line, Hasher hasher)
+  boolean consume(long line, Hasher hasher)
       throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException;
 
   void closeEntry(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException;

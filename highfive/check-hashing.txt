@@ -10,5 +10,5 @@ select count(*) as dupes, sum(cnt) as occurrences from (select count(*) as cnt f
 
 
 -- hashdupes <src
--- hashdump <src> <table> [<start> <end> [<step>]]
--- hashcompare <dest> <dump-file>
+-- hashd <src> <table> [<start> <end> [<step>]]
+-- hashc <dest> <table> <dump-file>

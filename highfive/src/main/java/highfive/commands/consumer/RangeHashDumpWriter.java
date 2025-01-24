@@ -18,13 +18,13 @@ public class RangeHashDumpWriter implements HashConsumer {
 
   public RangeHashDumpWriter(String tableName, File f, long start, long end) throws IOException {
     this.w = new BufferedWriter(new FileWriter(f));
-    this.w.write("# table: " + tableName + " (range " + start + "-" + end + ")\n");
+    this.w.write("# table: " + tableName + " (rows " + start + "-" + end + ")\n");
     this.start = start;
     this.end = end;
   }
 
   @Override
-  public boolean consume(int line, Hasher hasher) throws IOException, CloneNotSupportedException {
+  public boolean consume(long line, Hasher hasher) throws IOException, CloneNotSupportedException {
     if (line >= this.start && line <= this.end) {
       this.w.write(Utl.toHex(hasher.getInProgressDigest()) + " " + line + "\n");
     }

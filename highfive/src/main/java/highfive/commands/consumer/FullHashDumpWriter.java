@@ -20,7 +20,7 @@ public class FullHashDumpWriter implements HashConsumer {
   }
 
   @Override
-  public boolean consume(int line, Hasher hasher) throws IOException, CloneNotSupportedException {
+  public boolean consume(long line, Hasher hasher) throws IOException, CloneNotSupportedException {
     this.w.write(Utl.toHex(hasher.getInProgressDigest()) + " " + line + "\n");
     return true;
   }

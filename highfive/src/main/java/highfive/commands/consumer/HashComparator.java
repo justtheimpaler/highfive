@@ -20,6 +20,7 @@ public class HashComparator implements HashConsumer {
   private DumpFileReader b;
   private boolean beof;
 
+  private Long lastMatchedRow;
   private ExecutionStatus status;
 
   public HashComparator(String tableName, File baseline, File current)
@@ -29,10 +30,12 @@ public class HashComparator implements HashConsumer {
     this.baseline = baseline;
     this.b = new DumpFileReader(baseline);
     this.beof = false;
+    this.lastMatchedRow = null;
+    this.status = null;
   }
 
   @Override
-  public boolean consume(int liveRow, Hasher hasher)
+  public boolean consume(long liveRow, Hasher hasher)
       throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException {
     if (this.status != null) {
       return false;
@@ -47,7 +50,8 @@ public class HashComparator implements HashConsumer {
         return false;
       } else {
         this.status = ExecutionStatus
-            .success("The live table '" + this.tableName + "' fully matches the partial baseline dump file.");
+            .success("The live table '" + this.tableName + "' fully matches the partial baseline dump file" + " (rows "
+                + b.getMetadata().getStart() + "-" + b.getMetadata().getEnd() + ").");
         return false;
       }
     }
@@ -57,13 +61,51 @@ public class HashComparator implements HashConsumer {
     } else { // line == this.line
       String liveHash = hasher.getOngoingHash();
       if (!liveHash.equals(b.getHash())) {
-        this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '"
-            + this.tableName + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash());
+        computeErrorStatus(liveRow, liveHash);
         nextBaseline();
         return false;
       }
+      this.lastMatchedRow = liveRow;
       nextBaseline();
       return true;
+    }
+  }
+
+  private void computeErrorStatus(long liveRow, String liveHash) {
+    switch (b.getMetadata().getType()) {
+    case FULL:
+      this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '" + this.tableName
+          + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash());
+      break;
+    case RANGED:
+      if (this.lastMatchedRow == null && liveRow > 1) {
+        this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '"
+            + this.tableName + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash()
+            + "\n * Note: Since this is a ranged baseline hash dump file, the different row could be in row #" + liveRow
+            + ", or a row before it.");
+      } else {
+        this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '"
+            + this.tableName + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash());
+      }
+      break;
+    case STEPPED:
+      if (this.lastMatchedRow == null) {
+        if (liveRow > 1) {
+          this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '"
+              + this.tableName + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash()
+              + "\n * Note: Since this is a stepped baseline hash dump file, the different row could be in row #"
+              + liveRow + ", or a row before it.");
+        } else {
+          this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '"
+              + this.tableName + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash());
+        }
+      } else {
+        this.status = ExecutionStatus.failure("Found different hashes in row #" + liveRow + " in table '"
+            + this.tableName + "' -- current hash: " + liveHash + " -- baseline hash: " + b.getHash()
+            + "\n * Note: Since this is a stepped baseline hash dump file, the different row must be between rows #"
+            + (this.lastMatchedRow + 1) + " and #" + liveRow + ".");
+      }
+      break;
     }
   }
 
@@ -87,7 +129,8 @@ public class HashComparator implements HashConsumer {
             .success("The live table '" + this.tableName + "' fully matches the baseline dump file.");
       } else {
         this.status = ExecutionStatus
-            .success("The live table '" + this.tableName + "' fully matches the partial baseline dump file.");
+            .success("The live table '" + this.tableName + "' fully matches the partial baseline dump file (rows "
+                + b.getMetadata().getStart() + "-" + b.getMetadata().getEnd() + ").");
       }
     }
   }

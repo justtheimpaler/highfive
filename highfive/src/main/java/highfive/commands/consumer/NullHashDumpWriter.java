@@ -8,7 +8,7 @@ import highfive.model.Hasher;
 public class NullHashDumpWriter implements HashConsumer {
 
   @Override
-  public boolean consume(int line, Hasher hasher) throws IOException {
+  public boolean consume(long line, Hasher hasher) throws IOException {
     return true;
   }
 

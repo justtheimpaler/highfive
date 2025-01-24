@@ -19,7 +19,7 @@ public class HashFileWriter implements HashConsumer {
   }
 
   @Override
-  public boolean consume(int line, Hasher hasher) throws IOException {
+  public boolean consume(long line, Hasher hasher) throws IOException {
     this.lastHasher = hasher;
     return true;
   }

@@ -19,7 +19,7 @@ public class SteppedRangeHashDumpWriter implements HashConsumer {
 
   public SteppedRangeHashDumpWriter(String tableName, File f, long start, long end, long step) throws IOException {
     this.w = new BufferedWriter(new FileWriter(f));
-    this.w.write("# table: " + tableName + " (range " + start + "-" + end + ", step " + step + ")\n");
+    this.w.write("# table: " + tableName + " (rows " + start + "-" + end + ", step " + step + ")\n");
     this.start = start;
     this.end = end;
     this.step = step;
@@ -27,7 +27,7 @@ public class SteppedRangeHashDumpWriter implements HashConsumer {
   }
 
   @Override
-  public boolean consume(int line, Hasher hasher) throws IOException, CloneNotSupportedException {
+  public boolean consume(long line, Hasher hasher) throws IOException, CloneNotSupportedException {
     if (line >= this.start && line <= this.end) {
       if (line == this.nextLine) {
         this.w.write(Utl.toHex(hasher.getInProgressDigest()) + " " + line + "\n");
