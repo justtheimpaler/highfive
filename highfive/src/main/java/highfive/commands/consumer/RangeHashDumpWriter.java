@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import highfive.commands.consumer.HashConsumer.ExecutionStatus;
 import highfive.exceptions.InvalidHashFileException;
 import highfive.model.Hasher;
 import highfive.utils.Utl;
@@ -42,7 +43,7 @@ public class RangeHashDumpWriter implements HashConsumer {
 
   @Override
   public ExecutionStatus getStatus() {
-    return ExecutionStatus.success();
+    return ExecutionStatus.success("Ranged hash file generated.");
   }
 
 }

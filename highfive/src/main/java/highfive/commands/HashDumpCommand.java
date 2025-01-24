@@ -54,7 +54,7 @@ public class HashDumpCommand extends GenericHashCommand {
       ExecutionStatus status = hc.getStatus();
       if (!status.successful()) {
 //        System.out.println(status.getErrorMessage());
-        error(status.getErrorMessage());
+        error(status.getMessage());
       }
     } catch (Exception e) {
       e.printStackTrace(System.out);

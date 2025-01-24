@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import highfive.commands.consumer.DumpFileReader.DumpFileIOException;
+import highfive.commands.consumer.DumpFileReader.DumpFileType;
 import highfive.commands.consumer.DumpFileReader.InvalidDumpFileException;
 import highfive.exceptions.InvalidHashFileException;
 import highfive.model.Hasher;
@@ -40,9 +41,15 @@ public class HashComparator implements HashConsumer {
       nextBaseline();
     }
     if (this.beof) {
-      this.status = ExecutionStatus.failure("Found more rows in the live table '" + this.tableName
-          + "' than in the baseline file; no matching baseline hash for live row #" + liveRow);
-      return false;
+      if (b.getMetadata().getType() == DumpFileType.FULL) {
+        this.status = ExecutionStatus.failure("Found more rows in the live table '" + this.tableName
+            + "' than in the baseline file; no matching baseline hash for live row #" + liveRow);
+        return false;
+      } else {
+        this.status = ExecutionStatus
+            .success("The live table '" + this.tableName + "' fully matches the partial baseline dump file.");
+        return false;
+      }
     }
 
     if (b.getRow() > liveRow) {
@@ -75,7 +82,13 @@ public class HashComparator implements HashConsumer {
       this.status = ExecutionStatus.failure("Found more rows in the baseline file than in the live table '"
           + this.tableName + "'; the table does not a row #" + b.getRow());
     } else {
-      this.status = ExecutionStatus.success();
+      if (b.getMetadata().getType() == DumpFileType.FULL) {
+        this.status = ExecutionStatus
+            .success("The live table '" + this.tableName + "' fully matches the baseline dump file.");
+      } else {
+        this.status = ExecutionStatus
+            .success("The live table '" + this.tableName + "' fully matches the partial baseline dump file.");
+      }
     }
   }
 

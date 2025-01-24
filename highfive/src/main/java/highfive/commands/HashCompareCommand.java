@@ -47,10 +47,9 @@ public class HashCompareCommand extends GenericHashCommand {
       super.hashOneTable(t, hc);
       ExecutionStatus status = hc.getStatus();
       if (status.successful()) {
-        info("Hash dump comparison successful -- The live table '" + hashDumpConfig.getTableName()
-            + "' fully matches the baseline dump file.");
+        info("Hash dump comparison successful -- " + status.getMessage());
       } else {
-        error("Hash dump comparison failed -- " + status.getErrorMessage());
+        error("Hash dump comparison failed -- " + status.getMessage());
       }
 
     } catch (Exception e) {

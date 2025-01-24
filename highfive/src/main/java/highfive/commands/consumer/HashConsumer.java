@@ -17,32 +17,32 @@ public interface HashConsumer extends AutoCloseable {
   public static class ExecutionStatus {
 
     private boolean successful;
-    private String errorMessage;
+    private String message;
 
-    private ExecutionStatus(boolean successful, String errorMessage) {
+    private ExecutionStatus(boolean successful, String message) {
       this.successful = successful;
-      this.errorMessage = errorMessage;
+      this.message = message;
     }
 
-    public static ExecutionStatus success() {
-      return new ExecutionStatus(true, null);
+    public static ExecutionStatus success(String message) {
+      return new ExecutionStatus(true, message);
     }
 
-    public static ExecutionStatus failure(String errorMessage) {
-      return new ExecutionStatus(false, errorMessage);
+    public static ExecutionStatus failure(String message) {
+      return new ExecutionStatus(false, message);
     }
 
     public boolean successful() {
       return successful;
     }
 
-    public String getErrorMessage() {
-      return errorMessage;
+    public String getMessage() {
+      return message;
     }
 
     @Override
     public String toString() {
-      return "ExecutionStatus [successful=" + successful + ", errorMessage=" + errorMessage + "]";
+      return "ExecutionStatus [successful=" + successful + ", message=" + message + "]";
     }
 
   }

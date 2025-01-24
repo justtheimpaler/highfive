@@ -23,7 +23,7 @@ public class NullHashDumpWriter implements HashConsumer {
 
   @Override
   public ExecutionStatus getStatus() {
-    return ExecutionStatus.success();
+    return ExecutionStatus.success("");
   }
 
 }

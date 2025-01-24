@@ -49,7 +49,7 @@ public class SteppedRangeHashDumpWriter implements HashConsumer {
 
   @Override
   public ExecutionStatus getStatus() {
-    return ExecutionStatus.success();
+    return ExecutionStatus.success("Ranged hash file generated.");
   }
 
 }

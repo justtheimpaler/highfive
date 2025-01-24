@@ -43,7 +43,7 @@ public class HashFileWriter implements HashConsumer {
 
   @Override
   public ExecutionStatus getStatus() {
-    return ExecutionStatus.success();
+    return ExecutionStatus.success("Hash file generated.");
   }
 
 }

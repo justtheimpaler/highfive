@@ -37,7 +37,7 @@ public class FullHashDumpWriter implements HashConsumer {
 
   @Override
   public ExecutionStatus getStatus() {
-    return ExecutionStatus.success();
+    return ExecutionStatus.success("Full hash dump generated");
   }
 
 }
