@@ -49,7 +49,6 @@ public class HashFile {
   }
 
   public void saveTo(final String file) throws IOException {
-    System.out.println(">> saveTo() - this.map.size()=" + this.map.size());
     try (Writer w = new BufferedWriter(new FileWriter(new File(file)))) {
       for (String table : this.map.keySet()) {
         Hash h = this.map.get(table);

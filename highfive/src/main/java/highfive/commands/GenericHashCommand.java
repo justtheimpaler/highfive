@@ -131,14 +131,20 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
       try (ResultSet rs = ps.executeQuery();) {
         int logCount = 0;
-        int line = 0;
+        int row = 0;
         int orderingErrors = 0;
         boolean active = true;
 
         while (rs.next() && active) {
+          logCount++;
+          row++;
+          if (logCount >= 100000) {
+            info("    " + DF.format(row) + " rows read");
+            logCount = 0;
+          }
 
-          if (this.ds.getLogHashingValues()) {
-            info("    * Row #" + (line + 1) + ":");
+          if (this.ds.getLogHashingRange().includes(row)) {
+            info("    * Row #" + row + ":");
           }
           int col = 1;
           byte[] bytes = null;
@@ -150,31 +156,25 @@ public abstract class GenericHashCommand extends DataSourceCommand {
             } catch (SQLException e) {
               error("The JDBC driver could not read the value of column '" + c.getCanonicalName() + "' on table '"
                   + tn.getCanonicalName() + "' as a '" + c.getSerializer().getName()
-                  + "' value. The error happened in row #" + DF.format(line + 1)
+                  + "' value. The error happened in row #" + DF.format(row)
                   + " when the table is sorted by the columns: " + selectOrdering + ".");
               throw e;
             } catch (RuntimeException e) {
               error("Could not serialize the value for column '" + c.getCanonicalName() + "' on table '"
-                  + tn.getCanonicalName() + "'. The error happened in row #" + DF.format(line + 1)
+                  + tn.getCanonicalName() + "'. The error happened in row #" + DF.format(row)
                   + " when the table is sorted by the columns: " + selectOrdering + ". Is '"
                   + c.getSerializer().getClass().getSimpleName() + "' the correct serializer for this column?");
               throw e;
             }
             h.apply(bytes);
-            if (this.ds.getLogHashingValues()) {
+            if (this.ds.getLogHashingRange().includes(row)) {
               byte[] d = h.getInProgressDigest();
               info("      " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes)
-                  + " -- digest: " + Utl.toHex(d));
+                  + " -- hash: " + Utl.toHex(d));
             }
             col++;
           }
-          logCount++;
-          line++;
-          if (logCount >= 100000) {
-            info("    " + DF.format(line) + " rows read");
-            logCount = 0;
-          }
-          if (ds.getMaxRows() != null && line >= ds.getMaxRows()) {
+          if (ds.getMaxRows() != null && row >= ds.getMaxRows()) {
             info("    - Limit of " + ds.getMaxRows()
                 + " rows (max.rows) reached when reading this table -- moving on to the next table.");
             break;
@@ -194,7 +194,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           }
 
           rowComparator.next();
-          active = hc.consume(line, h);
+          active = hc.consume(row, h);
 //          info("-- Consumed line #" + line + " - active=" + active);
 
         }
@@ -211,7 +211,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 //        info(">> will close entry: " + t.getIdentifier().getGenericName());
         hc.closeEntry(t.getIdentifier().getGenericName(), orderingErrors > 0);
 
-        info("    " + DF.format(line) + " row(s) read");
+        info("    " + DF.format(row) + " row(s) read");
 
       } catch (Throwable e) {
         e.printStackTrace(System.out);

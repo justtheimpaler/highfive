@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import highfive.exceptions.InvalidConfigurationException;
@@ -51,7 +53,8 @@ public class DataSource {
   private TypeSolver solver;
   private Long maxRows;
   private String hashingCollation;
-  private boolean logHashingValues;
+//  private boolean logHashingValues;
+  private RowRange logHashingRange;
   private boolean logSQL;
   private long insertBatchSize;
   private LinkedHashMap<String, TableHashingOrdering> hashingOrderings;
@@ -68,7 +71,7 @@ public class DataSource {
   public DataSource(String name, String driverJAR, String driverClass, String url, String username, String password,
       String catalog, String schema, String removeTablePrefix, final Boolean declaredSelectAutoCommit,
       Integer selectFetchSize, final boolean readOnly, TableFilter tableFilter, ColumnFilter columnFilter, Long maxRows,
-      String hashingCollation, boolean logHashingValues, boolean logSQL, long insertBatchSize, TypeSolver solver,
+      String hashingCollation, RowRange logHashingRange, boolean logSQL, long insertBatchSize, TypeSolver solver,
       LinkedHashMap<String, TableHashingOrdering> hashingOrderings)
       throws SQLException, UnsupportedDatabaseTypeException {
     this.name = name;
@@ -85,7 +88,7 @@ public class DataSource {
     this.columnFilter = columnFilter;
     this.maxRows = maxRows;
     this.hashingCollation = hashingCollation;
-    this.logHashingValues = logHashingValues;
+    this.logHashingRange = logHashingRange;
     this.logSQL = logSQL;
     this.insertBatchSize = insertBatchSize;
     this.solver = solver;
@@ -191,7 +194,7 @@ public class DataSource {
     }
     String columnFilterList = props.getProperty(name + ".column.filter");
     String sMaxRows = props.getProperty(name + ".max.rows");
-    String sLogHashingValues = props.getProperty(name + ".log.hashing.values");
+    String sLogHashingRange = props.getProperty(name + ".log.hashing.range");
     String sLogSQL = props.getProperty(name + ".log.sql");
     String sInsertBatchSize = props.getProperty(name + ".insert.batch.size");
     String typeRules = props.getProperty(name + ".type.rules");
@@ -298,16 +301,40 @@ public class DataSource {
 
     // Log Hashing Values
 
-    boolean logHashingValues = false;
-    if (Utl.empty(sLogHashingValues)) {
+    Pattern hr = Pattern.compile("^(\\d+)\\-(\\d+)$");
+    RowRange logHashingRange = null;
+    if (Utl.empty(sLogHashingRange)) {
       // leave default value
-    } else if ("false".equals(sLogHashingValues)) {
-      logHashingValues = false;
-    } else if ("true".equals(sLogHashingValues)) {
-      logHashingValues = true;
     } else {
-      throw new InvalidConfigurationException("If the property '" + name + ".log.hashing.values"
-          + "' is specified it must be either 'true' or 'false', but found '" + sReadOnly + "'.");
+      Matcher m = hr.matcher(sLogHashingRange);
+      if (!m.matches()) {
+        throw new InvalidConfigurationException("If the property '" + name + ".log.hashing.range"
+            + "' is specified it must be a row range with the form '123-456', but found '" + sLogHashingRange + "'.");
+      }
+      String v = m.group(1);
+      long start;
+      try {
+        start = Long.parseLong(v);
+      } catch (NumberFormatException e) {
+        throw new InvalidConfigurationException(
+            "Invalid value '" + v + "' as the starting value of the row range in the property '" + name
+                + ".log.hashing.range" + "'. Must be an integer value (a long).");
+      }
+      v = m.group(2);
+      long end;
+      try {
+        end = Long.parseLong(m.group(2));
+      } catch (NumberFormatException e) {
+        throw new InvalidConfigurationException(
+            "Invalid value '" + v + "' as the end value of the row range in the property '" + name
+                + ".log.hashing.range" + "'. Must be an integer value (a long)");
+      }
+      if (end < start) {
+        throw new InvalidConfigurationException("Invalid value row range in the property '" + name
+            + ".log.hashing.range" + "'. The end row must be equal or greather than the starting row, but found '"
+            + sLogHashingRange + "'.");
+      }
+      logHashingRange = new RowRange(start, end);
     }
 
     // Log SQL
@@ -405,7 +432,7 @@ public class DataSource {
 
     return new DataSource(name, driverJAR, driverClass, url, username, password, catalog, schema, removeTablePrefix,
         declaredSelectAutoCommit, selectFetchSize, readOnly, tableFilter, columnFilter, maxRows, hashingCollation,
-        logHashingValues, logSQL, insertBatchSize, solver, hashingOrderings);
+        logHashingRange, logSQL, insertBatchSize, solver, hashingOrderings);
 
   }
 
@@ -497,8 +524,8 @@ public class DataSource {
     if (this.maxRows != null) {
       info("  max rows to read: " + this.maxRows);
     }
-    if (this.logHashingValues) {
-      info("  log hashing values: " + this.logHashingValues);
+    if (this.logHashingRange != null) {
+      info("  log hashing range: " + this.logHashingRange);
     }
     if (this.logSQL) {
       info("  log SQL: " + this.logSQL);
@@ -566,8 +593,8 @@ public class DataSource {
     return hashingCollation;
   }
 
-  public boolean getLogHashingValues() {
-    return logHashingValues;
+  public RowRange getLogHashingRange() {
+    return logHashingRange;
   }
 
   public boolean getLogSQL() {
@@ -637,6 +664,32 @@ public class DataSource {
   protected void error(final Throwable e) {
     System.out.print(DF.format(new Date()) + " ERROR - ");
     e.printStackTrace(System.out);
+  }
+
+  // Classes
+
+  public static class RowRange {
+
+    private long first;
+    private long last;
+
+    public RowRange(long first, long last) {
+      this.first = first;
+      this.last = last;
+    }
+
+    public boolean includes(long r) {
+      return r >= this.first && r <= this.last;
+    }
+
+    public boolean justBefore(long r) {
+      return r == this.first - 1;
+    }
+
+    public String toString() {
+      return "" + this.first + "-" + this.last;
+    }
+
   }
 
 }

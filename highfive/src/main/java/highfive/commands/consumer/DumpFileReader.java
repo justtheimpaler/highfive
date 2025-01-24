@@ -180,21 +180,13 @@ public class DumpFileReader {
       }
     }
 
-//    System.out.println(m.group(0)); // whole matched expression
-//    System.out.println(m.group(1)); // first expression from round brackets (Testing)
-//    System.out.println(m.group(2)); // second one (123)
-//    System.out.println(m.group(3)); // third one (Testing)  
-
     private static final Pattern RANGED_TABLE = Pattern.compile("^# table: (.*) \\(rows (\\d+)\\-(\\d+)\\)$");
 
     public static DumpFileMetaData isRangedTable(final String header) {
-//      log.info("R0: '" + header + "'");
       Matcher m = RANGED_TABLE.matcher(header);
       if (!m.matches()) {
-//        log.info("R1");
         return null;
       } else {
-//        log.info("R2");
         String table = m.group(1);
         Long start = Long.parseLong(m.group(2));
         Long end = Long.parseLong(m.group(3));
