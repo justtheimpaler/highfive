@@ -2,11 +2,11 @@
 
 HighFive helps with migrating data from one database to another, especially when these databases are of different vendors.
 
-One functionality of HighFive is to **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
+One one side, HighFive can **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
 
 HighFive comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for data copying or verification. Third-party tools that specialize in this scenarios can have high licensing costs. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
 
-The other functionality of HighFive is to **compare the data between two (or more) databases**. This is particularly useful to verify the data was copied correctly to a destination database -- by this tool or by another one.
+On the other side, HighFive can **compare the data between two (or more) databases**. This is particularly useful to verify the data was copied correctly to a destination database -- by this tool or by another one.
 
 It performs the comparison by computing hash values for each table in one database (the "baseline database") and then by computing again the hash values in the other database(s). If the data was copied correctly these hashes will fully match. The implemented strategy considers computing the hash values of all the data in both schemas using the SHA-256 algorithm. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
 
