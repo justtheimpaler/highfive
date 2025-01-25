@@ -207,7 +207,9 @@ The configurable properties are:
 
 ### Step 3 - Commands
 
-HighFive implements the following commands:
+HighFive implements core commands that will be used for the most typical uses cases and auditing commands that to unravel and find a remedy to special cases when the migrated data does not fully match on both sides.
+
+#### Core Commands
 
 | Command | Description |
 | --  | -- |
@@ -216,9 +218,47 @@ HighFive implements the following commands:
 | `hash <datasource>` | Hashes the schema and saves the result to the file `<datasource>.hash` |
 | `verify <datasource> <baseline-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
 | `copy <from-datasource> <to-datasource>` | Copies the data of the tables from a source datasource to a destination datasource. The destination tables must be empty. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
+
+#### Auditing Commands
+
+| Command | Description |
+| --  | -- |
 | `hashd <datasource> <table> [<start> <end> [<step>]]` | Dumps row hashes for a single table to the file `<datasource>.dump`. If `start` and `end` are specified, it only dumps the specific row range of the table. If the `step` value is also specified it saves one hash every this number of rows (to reduce the size of the dump file) |
 | `hashc <datasource> <table> <dump-file>` | Compares the a table against the baseline dump file produced by the `hashd` command. If it finds different hash values for a row, it displays the hashes, the row number, and then stops. It automatically detects the dump file range and step, if present, and acts accordingly |
 | `hashl <datasource> <table> <start> <end>` | Displays the hash value for each field of each row of a table. Very verbose. Can be used to find out why two seemingly identical tables in two databases are actually producing different hashes. Only the selected row range is displayed, although all previous rows are computed |
+
+There can be many issues that can cause the migrated data to not match the source data for a table. To name a few, consider:
+
+- Mismatching collations in VARCHAR columns that can silently transform characters when they cannot be represented in the destination database.
+- Time zones that cannot represent certain times of the some days, due to daylight savings time switching. For example, some databases allow any TIMESTAMP while other cannot represent March 10, 2024 at 2:15 am in the America/New York time zone; the clock jumped from 1:59 am to 3:00 am that night.
+- Mismatching collations can sort alphabetic and non-alphabetic characters in very different ways in each database; the sorting order is crucial to correctly compute the hashes in each table.
+- Some databases are permissive when it comes to trailing spaces in foreign keys, while other require exact matches. An effort to fix those and trim them will necessarily produce a mismatch when comparing data.
+
+#### General Strategy To Resolve Mismatching Data In Tables
+
+If you think a table was copied correcly but the hashing verification still show differences, then the following strategy will allow you to find the root cause of the issue.
+
+##### Find The Mismatching Rows
+
+First, use the `hashd` command ("hash dump") on the specific table to generated a dump file with hashes for each row of the table. You now have a dump file, ready to be compared to the table in the other database.
+
+Second, use the `hashc` command ("hash compare") to compare the table in the other database to the dump file you generated in the previous step. This command will compare the hashes row-by-row and will inform you if all the hashes fully match or not. If the don't it will inform the specific row where the difference was found.
+
+Finally, use the `hashl` command ("hash log") in both databases to display all the values for the fields in the specific rows and how the hash is being computed for each field. Once you find out on which field the hash becomes different, then the field values are different. Sometimes the difference is apparent (a trailing space), sometimes the differences are not easy to spot (an extra decimal place in a timestamp with fractional seconds, or a unexpected collation enconding).
+
+**Note**: If the table is too large you can use the `step` parameter of the `hashd` command to generate one hash per thousand rows or so, to keep the dump file size manageable. The `start` and `end` parameters can also help to narrow down of rows you are inspecting.
+
+**Note**: The concept of first row, second row is artificial since relational databases tables do not have inherent row ordering. In this case the row numbering is done according to the hashing ordering specified in the datasource configuration, either using the primary key of the table or explicitly names ordering columns; this ordering can be further affected by the specified collations on VARCHAR columns.
+
+##### Fix The Mismatching Row
+
+Once the data mismatch is found, then there are two main outcomes: one decide that the difference is "explained" and no further action is needed, or take actions to make both databases exactly equal.
+
+If the latter option is decided, then the typical effort is done in the destination databases, the new one. Most of the time the new database can be easily "fixed" by extra SQL script that massages the data to fix the special cases.
+
+However, sometimes this is not possible: think of a foreign key value that needs to be trimmed to actually work in the new database. In cases like these, it's typically the source data that has an anomaly that is rejected by the destination database. If this is the case, maybe it's possible to fix the data in the source; this should be carefully assessed with enough time to test the source application and make any necessary adjustments.
+
+Whichever option is decided, once the data is fixed the table needs to be migrated again and also verified to make sure it fully matches.
 
 
 ## Examples
