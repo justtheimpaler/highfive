@@ -207,9 +207,9 @@ The configurable properties are:
 
 ### Step 3 - Commands
 
-HighFive implements core commands that will be used for the most typical uses cases and auditing commands that to unravel and find a remedy to special cases when the migrated data does not fully match on both sides.
+HighFive implements essential commands that will be used for the most typical uses cases and auditing commands used to unravel and find a remedy to special cases when the migrated data does not fully match in two or more databases.
 
-#### Core Commands
+#### Essential Commands
 
 | Command | Description |
 | --  | -- |
