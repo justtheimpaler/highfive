@@ -204,7 +204,6 @@ The configurable properties are:
 | `<datasource>.readonly` | Optional. Declares this datasource as readonly (default) or writable. This property is  a safeguard to protect the datasources when copying data. A destination datasouce needs to be explicitly set as writable (`readonly=false`) for the `copy` command to work |
 | `<datasource>.insert.batch.size` | Optional. Declares the insert batch size when copying data from one database to another. Defaults to 100 |
 | `<datasource>.log.sql`              | Optional. Defaults to `false`. Log the SQL queries executed in the datasource |
-| `<datasource>.log.hashing.values`   | Optional. Defaults to `false`. Logs the hashing values computed for each field of each row of the tables. Very verbose; use only for debugging |
 
 ### Step 3 - Commands
 
@@ -217,6 +216,9 @@ HighFive implements the following commands:
 | <code>hash <datasource></code> | Hashes the schema and saves the result to the file `<datasource>.hash` |
 | <code>verify <datasource> <baseline-file></code> | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
 | <code>copy <from-datasource> <to-datasource></code> | Copies the data of the tables from a source datasource to a destination datasource. The destination tables must be empty. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
+| <code>hashd <datasource> <table> [<start> <end> [<step>]]</code> | Dumps row hashes for a single table. If `start` and `end` are specified it will dump that specific row range. Optionally, a `step` value can be specified to dump only one value per batch. Saves the dump file to `<datasource>.dump` |
+| <code>hashc <datasource> <table> <baseline-file></code> | Compared the a table againts the dump baseline file. Stops if it finds a different hash value for a row |
+| <code>hashl <datasource> <table> <start> <end></code> | Displays a detailed log as hashes are being computed value-by-value in each row of the speficied table. Only the selected row range is displayed, altough all previous rows are nevertheless computed |
 
 
 ## Examples
