@@ -372,9 +372,9 @@ The hashes were saved to a hash file with the name of the datasource and the ext
 that is, to the file `src.hash`. The content of it looks like:
 
 ```bash
-e37e7a4668c70da684b4e582c45589430be4d1a0 client
-50745d7fb5fbd6b0b87f744aa459ac9e5091ae29 invoice
-c6f0c8c409678d84c3325e751cbc999ecda68474 payment
+f5a9d70a5ad127b7ef06e5e50f5328db9ac33fb2cda28283d00ac181155f1a28 client
+b8cea9c6031acd9bc08c88d83243891a724403682b924e50d81b3c123a6090a0 invoice
+45db23a2968a19c94ef142ecce37e18acdca97200653744bce1cd13ec4599177 payment
 ```
 
 These hashes will be compared to the destination table in the next step.
@@ -416,9 +416,9 @@ datasource and the extension `.hash`; in this case this file is `dest.hash`. The
 this file looks like:
 
 ```bash
-e37e7a4668c70da684b4e582c45589430be4d1a0 client
-50745d7fb5fbd6b0b87f744aa459ac9e5091ae29 invoice
-c6f0c8c409678d84c3325e751cbc999ecda68474 payment
+f5a9d70a5ad127b7ef06e5e50f5328db9ac33fb2cda28283d00ac181155f1a28 client
+b8cea9c6031acd9bc08c88d83243891a724403682b924e50d81b3c123a6090a0 invoice
+45db23a2968a19c94ef142ecce37e18acdca97200653744bce1cd13ec4599177 payment
 ```
 
 In this case it looks exactly as the previous one, and that's why the verification succeeded. If data corruption had taken place, you would see different values compared to the original one.
