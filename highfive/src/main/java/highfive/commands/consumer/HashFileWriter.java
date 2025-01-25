@@ -3,6 +3,7 @@ package highfive.commands.consumer;
 import java.io.IOException;
 
 import highfive.exceptions.InvalidHashFileException;
+import highfive.model.Column;
 import highfive.model.HashFile;
 import highfive.model.Hasher;
 import highfive.utils.Utl;
@@ -19,7 +20,15 @@ public class HashFileWriter implements HashConsumer {
   }
 
   @Override
-  public boolean consume(long line, Hasher hasher) throws IOException {
+  public void consumeValueHeader(long row) {
+  }
+
+  @Override
+  public void consumeValue(long row, Column c, byte[] bytes, Hasher h) throws CloneNotSupportedException {
+  }
+
+  @Override
+  public boolean consumeRow(long row, Hasher hasher) throws IOException {
     this.lastHasher = hasher;
     return true;
   }

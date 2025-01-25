@@ -143,9 +143,10 @@ public abstract class GenericHashCommand extends DataSourceCommand {
             logCount = 0;
           }
 
-          if (this.ds.getLogHashingRange().includes(row)) {
-            info("    * Row #" + row + ":");
-          }
+          hc.consumeValueHeader(row);
+//          if (this.ds.getLogHashingRange().includes(row)) {
+//            info("    * Row #" + row + ":");
+//          }
           int col = 1;
           byte[] bytes = null;
           for (Column c : t.getColumns()) {
@@ -167,11 +168,13 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               throw e;
             }
             h.apply(bytes);
-            if (this.ds.getLogHashingRange().includes(row)) {
-              byte[] d = h.getInProgressDigest();
-              info("      " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes)
-                  + " -- hash: " + Utl.toHex(d));
-            }
+            
+            hc.consumeValue(row, c, bytes, h);
+//            if (this.ds.getLogHashingRange().includes(row)) {
+//              byte[] d = h.getInProgressDigest();
+//              info("      " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes)
+//                  + " -- hash: " + Utl.toHex(d));
+//            }
             col++;
           }
           if (ds.getMaxRows() != null && row >= ds.getMaxRows()) {
@@ -194,7 +197,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           }
 
           rowComparator.next();
-          active = hc.consume(row, h);
+          active = hc.consumeRow(row, h);
 //          info("-- Consumed line #" + line + " - active=" + active);
 
         }

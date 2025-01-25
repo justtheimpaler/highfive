@@ -8,6 +8,7 @@ import highfive.commands.consumer.DumpFileReader.DumpFileIOException;
 import highfive.commands.consumer.DumpFileReader.DumpFileType;
 import highfive.commands.consumer.DumpFileReader.InvalidDumpFileException;
 import highfive.exceptions.InvalidHashFileException;
+import highfive.model.Column;
 import highfive.model.Hasher;
 
 public class HashComparator implements HashConsumer {
@@ -35,7 +36,15 @@ public class HashComparator implements HashConsumer {
   }
 
   @Override
-  public boolean consume(long liveRow, Hasher hasher)
+  public void consumeValueHeader(long row) {
+  }
+
+  @Override
+  public void consumeValue(long row, Column c, byte[] bytes, Hasher h) throws CloneNotSupportedException {
+  }
+
+  @Override
+  public boolean consumeRow(long liveRow, Hasher hasher)
       throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException {
     if (this.status != null) {
       return false;

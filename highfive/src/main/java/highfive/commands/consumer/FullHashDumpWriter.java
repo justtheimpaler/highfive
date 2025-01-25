@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import highfive.exceptions.InvalidHashFileException;
+import highfive.model.Column;
 import highfive.model.Hasher;
 import highfive.utils.Utl;
 
@@ -20,8 +21,16 @@ public class FullHashDumpWriter implements HashConsumer {
   }
 
   @Override
-  public boolean consume(long line, Hasher hasher) throws IOException, CloneNotSupportedException {
-    this.w.write(Utl.toHex(hasher.getInProgressDigest()) + " " + line + "\n");
+  public void consumeValueHeader(long row) {
+  }
+
+  @Override
+  public void consumeValue(long row, Column c, byte[] bytes, Hasher h) throws CloneNotSupportedException {
+  }
+
+  @Override
+  public boolean consumeRow(long row, Hasher hasher) throws IOException, CloneNotSupportedException {
+    this.w.write(Utl.toHex(hasher.getInProgressDigest()) + " " + row + "\n");
     return true;
   }
 

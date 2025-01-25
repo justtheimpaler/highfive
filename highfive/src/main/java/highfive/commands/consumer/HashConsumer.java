@@ -5,11 +5,16 @@ import java.io.IOException;
 import highfive.commands.consumer.DumpFileReader.DumpFileIOException;
 import highfive.commands.consumer.DumpFileReader.InvalidDumpFileException;
 import highfive.exceptions.InvalidHashFileException;
+import highfive.model.Column;
 import highfive.model.Hasher;
 
 public interface HashConsumer extends AutoCloseable {
 
-  boolean consume(long line, Hasher hasher)
+  void consumeValueHeader(long row);
+
+  void consumeValue(long row, Column c, byte[] bytes, Hasher h) throws CloneNotSupportedException;
+
+  boolean consumeRow(long row, Hasher hasher)
       throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException;
 
   void closeEntry(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException;

@@ -13,6 +13,7 @@ import highfive.commands.consumer.HashConsumer.ExecutionStatus;
 import highfive.commands.consumer.HashDumpWriterFactory;
 import highfive.commands.consumer.HashDumpWriterFactory.FullHashDumpWriterFactory;
 import highfive.commands.consumer.HashDumpWriterFactory.HashDumpComparatorFactory;
+import highfive.commands.consumer.HashDumpWriterFactory.HashDumpLoggerFactory;
 import highfive.commands.consumer.HashDumpWriterFactory.RangeHashDumpWriterFactory;
 import highfive.commands.consumer.HashDumpWriterFactory.SteppedHashDumpWriterFactory;
 import highfive.exceptions.CouldNotHashException;
@@ -91,12 +92,21 @@ public class HashDumpCommand extends GenericHashCommand {
       return new HashDumpConfig(tableName, null, null, null, new HashDumpComparatorFactory(new File(baseline)));
     }
 
+    public static HashDumpConfig forLog(String tableName, String start, String end) {
+      if (Utl.empty(tableName)) {
+        throw new RuntimeException("The hashlog command requires a non-empty table name.");
+      }
+      long s = parseStart("hashlog", start);
+      long e = parseEnd("hashlog", end, s);
+      return new HashDumpConfig(tableName, null, null, null, new HashDumpLoggerFactory(s, e));
+    }
+
     public static HashDumpConfig of(String tableName, String start, String end) {
       if (Utl.empty(tableName)) {
         throw new RuntimeException("The hashdump command requires a non-empty table name.");
       }
-      long s = parseStart(start);
-      long e = parseEnd(start, end, s);
+      long s = parseStart("hashdump", start);
+      long e = parseEnd("hashdump", end, s);
       return new HashDumpConfig(tableName, s, e, null, new RangeHashDumpWriterFactory());
     }
 
@@ -104,59 +114,59 @@ public class HashDumpCommand extends GenericHashCommand {
       if (Utl.empty(tableName)) {
         throw new RuntimeException("The hashdump command requires a non-empty table name.");
       }
-      long s = parseStart(start);
-      long e = parseEnd(start, end, s);
-      long st = parseStep(start, step);
+      long s = parseStart("hashdump", start);
+      long e = parseEnd("hashdump", end, s);
+      long st = parseStep("hashdump", step);
       return new HashDumpConfig(tableName, s, e, st, new SteppedHashDumpWriterFactory());
     }
 
     // parsing
 
-    private static long parseEnd(String start, String end, long s) {
+    private static long parseEnd(String command, String end, long s) {
       long e;
       try {
         e = Long.parseLong(end);
       } catch (NumberFormatException e1) {
         throw new RuntimeException(
-            "The hashdump <end> parameter must be a positive integer but found '" + start + "'.");
+            "The " + command + " <end> parameter must be a positive integer but found '" + end + "'.");
       }
       if (e < 0) {
         throw new RuntimeException(
-            "The hashdump <end> parameter must be a positive integer but found '" + start + "'.");
+            "The " + command + " <end> parameter must be a positive integer but found '" + end + "'.");
       }
       if (e < s) {
         throw new RuntimeException(
-            "The hashdump <end> parameter must have a value equal or greater than the <start> parameter.");
+            "The " + command + " <end> parameter must have a value equal or greater than the <start> parameter.");
       }
       return e;
     }
 
-    private static long parseStart(String start) {
+    private static long parseStart(String command, String start) {
       long s;
       try {
         s = Long.parseLong(start);
       } catch (NumberFormatException e1) {
         throw new RuntimeException(
-            "The hashdump <start> parameter must be a positive integer but found '" + start + "'.");
+            "The " + command + " <start> parameter must be a positive integer but found '" + start + "'.");
       }
       if (s < 0) {
         throw new RuntimeException(
-            "The hashdump <start> parameter must be a positive integer but found '" + start + "'.");
+            "The " + command + " <start> parameter must be a positive integer but found '" + start + "'.");
       }
       return s;
     }
 
-    private static long parseStep(String start, String step) {
+    private static long parseStep(String command, String step) {
       long st;
       try {
         st = Long.parseLong(step);
       } catch (NumberFormatException e1) {
         throw new RuntimeException(
-            "The hashdump <step> parameter must be a positive integer but found '" + start + "'.");
+            "The " + command + " <step> parameter must be a positive integer but found '" + step + "'.");
       }
       if (st < 1) {
-        throw new RuntimeException(
-            "The hashdump <step> parameter must be a positive integer greater than zero, but found '" + start + "'.");
+        throw new RuntimeException("The " + command
+            + " <step> parameter must be a positive integer greater than zero, but found '" + step + "'.");
       }
       return st;
     }

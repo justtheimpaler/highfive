@@ -14,6 +14,7 @@ import highfive.commands.HashCompareCommand;
 import highfive.commands.HashDumpCommand;
 import highfive.commands.HashDumpCommand.HashDumpConfig;
 import highfive.commands.HashDupesCommand;
+import highfive.commands.HashLoggingCommand;
 import highfive.commands.ListColumnsAndCheckCommand;
 import highfive.commands.ListTablesAndCheckCommand;
 import highfive.commands.VerifyCommand;
@@ -113,12 +114,25 @@ public class HighFive {
           System.exit(1);
         }
 
-        // -- 0---- 1--- 2------ 3
+        // -- 0---- 1--- 2------ 3--------------
         // -- hashc <ds> <table> <baseline-file>
       } else if (args.length == 4 && "hashc".equals(args[0])) {
         try {
           HashDumpConfig config = HashDumpConfig.forCompare(args[2], args[3]);
           Command c = new HashCompareCommand(args[1], config);
+          c.run();
+          System.exit(0);
+        } catch (ApplicationException e) {
+          error("Could not generate the hashdump: " + e.getMessage());
+          System.exit(1);
+        }
+
+        // -- 0---- 1--- 2------ 3------ 4----
+        // -- hashl <ds> <table> <start> <end>
+      } else if (args.length == 5 && "hashl".equals(args[0])) {
+        try {
+          HashDumpConfig config = HashDumpConfig.forLog(args[2], args[3], args[4]);
+          Command c = new HashLoggingCommand(args[1], config);
           c.run();
           System.exit(0);
         } catch (ApplicationException e) {

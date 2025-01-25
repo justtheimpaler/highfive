@@ -28,7 +28,7 @@ public class JULCustomFormatter extends Formatter {
     StringBuilder builder = new StringBuilder();
     appendDateTime(record, builder);
     appendLevel(record, builder);
-    appendClassNameAndLineNumber(record, builder);
+    // appendClassNameAndLineNumber(record, builder);
     appendMessage(record, builder);
     appendThrown(record, builder);
     builder.append("\n");

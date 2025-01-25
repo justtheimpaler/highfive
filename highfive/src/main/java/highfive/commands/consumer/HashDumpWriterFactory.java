@@ -28,6 +28,24 @@ public interface HashDumpWriterFactory {
 
   }
 
+  public static class HashDumpLoggerFactory implements HashDumpWriterFactory {
+
+    private long start;
+    private long end;
+
+    public HashDumpLoggerFactory(long start, long end) {
+      this.start = start;
+      this.end = end;
+    }
+
+    @Override
+    public HashConsumer getInstance(HashDumpConfig config, File current)
+        throws IOException, InvalidDumpFileException, DumpFileIOException {
+      return new HashLogger(config.getTableName(), this.start, this.end);
+    }
+
+  }
+
   public static class FullHashDumpWriterFactory implements HashDumpWriterFactory {
 
     @Override
