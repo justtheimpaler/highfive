@@ -238,7 +238,7 @@ There can be many issues that can cause the migrated data to not match the sourc
 
 If you think a table was copied correcly but the hashing verification still show differences, then the following strategy will allow you to find the root cause of the issue.
 
-##### Find The Mismatching Rows
+##### 1. Find The Mismatching Rows
 
 First, use the `hashd` command ("hash dump") on the specific table to generated a dump file with hashes for each row of the table. You now have a dump file, ready to be compared to the table in the other database.
 
@@ -250,7 +250,7 @@ Finally, use the `hashl` command ("hash log") in both databases to display all t
 
 **Note**: The concept of first row, second row is artificial since relational databases tables do not have inherent row ordering. In this case the row numbering is done according to the hashing ordering specified in the datasource configuration, either using the primary key of the table or explicitly names ordering columns; this ordering can be further affected by the specified collations on VARCHAR columns.
 
-##### Fix The Mismatching Row
+##### 2. Fix The Mismatching Row
 
 Once the data mismatch is found, then there are two main outcomes: one decide that the difference is "explained" and no further action is needed, or take actions to make both databases exactly equal.
 
