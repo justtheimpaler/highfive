@@ -211,14 +211,14 @@ HighFive implements the following commands:
 
 | Command | Description |
 | --  | -- |
-| <code>listtables <datasource></code> | Connects to the schema, list the tables in it, and checks they are all supported. Only tables and columns selected by the filters are considered. Useful to validate the connection and basic functionality |
-| <code>listcolumns <datasource></code> | Connects to the schema, list the tables and their columns in it and verify they are all supported. Only tables and columns selected by the filters are considered |
-| <code>hash <datasource></code> | Hashes the schema and saves the result to the file `<datasource>.hash` |
-| <code>verify <datasource> <baseline-file></code> | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
-| <code>copy <from-datasource> <to-datasource></code> | Copies the data of the tables from a source datasource to a destination datasource. The destination tables must be empty. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
-| `hashd <datasource> <table> [<start> <end> [<step>]]` | Dumps row hashes for a single table. If `start` and `end` are specified it will dump that specific row range. Optionally, a `step` value can be specified to dump only one value per batch. Saves the dump file to `<datasource>.dump` |
-| `hashc <datasource> <table> <baseline-file>` | Compared the a table againts the dump baseline file. Stops if it finds a different hash value for a row |
-| `hashl <datasource> <table> <start> <end>` | Displays a detailed log as hashes are being computed value-by-value in each row of the speficied table. Only the selected row range is displayed, altough all previous rows are nevertheless computed |
+| `listtables <datasource>` | Connects to the schema, list the tables in it, and checks they are all supported. Only tables and columns selected by the filters are considered. Useful to validate the connection and basic functionality |
+| `listcolumns <datasource>` | Connects to the schema, list the tables and their columns in it and verify they are all supported. Only tables and columns selected by the filters are considered |
+| `hash <datasource></code>` | Hashes the schema and saves the result to the file `<datasource>.hash` |
+| `verify <datasource> <baseline-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
+| `copy <from-datasource> <to-datasource>` | Copies the data of the tables from a source datasource to a destination datasource. The destination tables must be empty. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
+| `hashd <datasource> <table> [<start> <end> [<step>]]` | Dumps row hashes for a single table to the file `<datasource>.dump`. If `start` and `end` are specified it will dump the specific row range for the table. If `step` value is also specified it saves one hash every this number of rows |
+| `hashc <datasource> <table> <dump-file>` | Compares the a table againts the baseline dump file. If it finds a different hash value for a row, it displays the hashes, the row number, and stops. It automatically detects the dump file range and step, if present, and acts accordingly |
+| `hashl <datasource> <table> <start> <end>` | Displays the hash value for each field of each row of a table. Very verbose. Can be used to find out why two seemingly identical tables in two databases are actually producing different hashes. Only the selected row range is displayed, although all previous rows are, nevertheless, computed |
 
 
 ## Examples
