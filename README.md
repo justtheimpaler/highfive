@@ -223,9 +223,9 @@ HighFive implements core commands that will be used for the most typical uses ca
 
 | Command | Description |
 | --  | -- |
-| `hashd <datasource> <table> [<start> <end> [<step>]]` | Dumps row hashes for a single table to the file `<datasource>.dump`. If `start` and `end` are specified, it only dumps the specific row range of the table. If the `step` value is also specified it saves one hash every this number of rows (to reduce the size of the dump file) |
-| `hashc <datasource> <table> <dump-file>` | Compares the a table against the baseline dump file produced by the `hashd` command. If it finds different hash values for a row, it displays the hashes, the row number, and then stops. It automatically detects the dump file range and step, if present, and acts accordingly |
-| `hashl <datasource> <table> <start> <end>` | Displays the hash value for each field of each row of a table. Very verbose. Can be used to find out why two seemingly identical tables in two databases are actually producing different hashes. Only the selected row range is displayed, although all previous rows are computed |
+| `hashd <datasource> <table> [<start> <end> [<step>]]` | The Hash Dump command dumps row hashes for a single table to the file `<datasource>.dump`. If `start` and `end` are specified, it only dumps the specific row range of the table. If the `step` value is also specified it saves one hash every this number of rows (to reduce the size of the dump file) |
+| `hashc <datasource> <table> <dump-file>` | The Hash Compare command compares the a table against the baseline dump file produced by the `hashd` command. If it finds different hash values for a row, it displays the hashes, the row number, and then stops. It automatically detects the dump file range and step, if present, and acts accordingly |
+| `hashl <datasource> <table> <start> <end>` | The Hash Log command displays the hash value for each field of each row of a table. Very verbose. Can be used to find out why two seemingly identical tables in two databases are actually producing different hashes. Only the selected row range is displayed, although all previous rows are computed |
 
 There can be many issues that can cause the migrated data to not match the source data for a table. To name a few, consider:
 
