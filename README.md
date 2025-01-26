@@ -207,7 +207,7 @@ The configurable properties are:
 
 ### Step 3 - Commands
 
-HighFive implements essential commands that will be used for the essential uses cases and analysis commands used to unravel and find a remedy to special cases when the migrated data does not fully match in two or more databases.
+HighFive implements the essential commands to resolve the common uses cases and analysis commands to unravel the root cause and find a remedy to special cases when the migrated data does not fully match between databases.
 
 #### Essential Commands
 
