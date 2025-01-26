@@ -228,8 +228,8 @@ The analysis commands are used to find out the exact differences between two tab
 | Command | Description |
 | --  | -- |
 | `hashd <datasource> <table> [<start> <end> [<step>]]` | The Hash Dump command dumps row hashes for a single table to the file `<datasource>.dump`. If `start` and `end` are specified, it only dumps the specific row range of the table. If the `step` value is also specified it saves one hash every this number of rows (to reduce the size of the dump file) |
-| `hashc <datasource> <table> <dump-file>` | The Hash Compare command compares the a table against the baseline dump file produced by the `hashd` command. If it finds different hash values for a row, it displays the hashes, the row number, and then stops. It automatically detects the dump file range and step, if present, and acts accordingly |
-| `hashl <datasource> <table> <start> <end>` | The Hash Log command displays the hash value for each field of each row of a table. Very verbose. Can be used to find out why two seemingly identical tables in two databases are actually producing different hashes. Only the selected row range is displayed, although all previous rows are computed |
+| `hashc <datasource> <table> <dump-file>` | The Hash Compare command compares the a table against the baseline dump file produced by the `hashd` command. If it finds different hash values for a row, it displays the hashes and the row number where the first difference was found. It automatically detects the dump file range and step, if present, and acts accordingly |
+| `hashl <datasource> <table> <start> <end>` | The Hash Log command displays the hash value for each field of each row of a table (very verbose). Can be used to find out why two seemingly identical tables in two databases are actually producing different hash values. Only the selected row range is displayed, although all previous rows are always read and computed |
 
 There can be many issues that can cause the migrated data to not match the source data for a table. To name a few, consider:
 
@@ -250,9 +250,9 @@ Second, use the `hashc` command ("hash compare") to compare the table in the oth
 
 Finally, use the `hashl` command ("hash log") in both databases to display all the values for the fields in the specific rows and how the hash is being computed for each field. Once you find out on which field the hash becomes different, then the field values are different. Sometimes the difference is apparent (a trailing space), sometimes the differences are not easy to spot (an extra decimal place in a timestamp with fractional seconds, or a unexpected collation enconding).
 
-**Note**: If the table is too large you can use the `step` parameter of the `hashd` command to generate one hash per thousand rows or so, to keep the dump file size manageable. The `start` and `end` parameters can also help to narrow down of rows you are inspecting.
+> **Note**: If the table is too large you can use the `step` parameter of the `hashd` command to generate one hash per thousand rows or so, to keep the dump file size manageable. The `start` and `end` parameters can also help to narrow down of rows you are inspecting.
 
-**Note**: The concept of first row, second row is artificial since relational databases tables do not have inherent row ordering. In this case the row numbering is done according to the hashing ordering specified in the datasource configuration, either using the primary key of the table or explicitly names ordering columns; this ordering can be further affected by the specified collations on VARCHAR columns.
+> **Note**: The concept of first row, second row is artificial since relational databases tables do not have inherent row ordering. In this case the row numbering is done according to the hashing ordering specified in the datasource configuration, either using the primary key of the table or explicitly names ordering columns; this ordering can be further affected by the specified collations on VARCHAR columns.
 
 ##### 2. Fix The Mismatching Row
 
