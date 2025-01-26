@@ -207,9 +207,11 @@ The configurable properties are:
 
 ### Step 3 - Commands
 
-HighFive implements essential commands that will be used for the most typical uses cases and auditing commands used to unravel and find a remedy to special cases when the migrated data does not fully match in two or more databases.
+HighFive implements essential commands that will be used for the essential uses cases and analysis commands used to unravel and find a remedy to special cases when the migrated data does not fully match in two or more databases.
 
 #### Essential Commands
+
+These commands are used for the normal operation such as verifying migrated data, to copy data, and to verify preconditions for these operations.
 
 | Command | Description |
 | --  | -- |
@@ -219,7 +221,9 @@ HighFive implements essential commands that will be used for the most typical us
 | `verify <datasource> <baseline-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
 | `copy <from-datasource> <to-datasource>` | Copies the data of the tables from a source datasource to a destination datasource. The destination tables must be empty. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
 
-#### Auditing Commands
+#### Analysis Commands
+
+The analysis commands are used to find out the exact differences between two tables that should be identical but where their data fails to match completely.
 
 | Command | Description |
 | --  | -- |
