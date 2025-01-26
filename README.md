@@ -250,9 +250,9 @@ Second, use the `hashc` command ("hash compare") to compare the table in the oth
 
 Finally, use the `hashl` command ("hash log") in both databases to display all the values for the fields in the specific rows and how the hash is being computed for each field. Once you find out on which field the hash becomes different, then the field values are different. Sometimes the difference is apparent (a trailing space), sometimes the differences are not easy to spot (an extra decimal place in a timestamp with fractional seconds, or a unexpected collation enconding).
 
-> **Note**: If the table is too large you can use the `step` parameter of the `hashd` command to generate one hash per thousand rows or so, to keep the dump file size manageable. The `start` and `end` parameters can also help to narrow down of rows you are inspecting.
+**Note**: If the table is too large you can use the `step` parameter of the `hashd` command to generate one hash per thousand rows or so, to keep the dump file size manageable. The `start` and `end` parameters can also help to narrow down of rows you are inspecting.
 
-> **Note**: The concept of first row, second row is artificial since relational databases tables do not have inherent row ordering. In this case the row numbering is done according to the hashing ordering specified in the datasource configuration, either using the primary key of the table or explicitly names ordering columns; this ordering can be further affected by the specified collations on VARCHAR columns.
+**Note**: The concept of first row, second row is artificial since relational databases tables do not have inherent row ordering. In this case the row numbering is done according to the hashing ordering specified in the datasource configuration, either using the primary key of the table or explicitly names ordering columns; this ordering can be further affected by the specified collations on VARCHAR columns.
 
 ##### 2. Fix The Mismatching Row
 
