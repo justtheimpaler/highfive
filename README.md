@@ -234,7 +234,7 @@ The analysis commands are used to find out the exact differences between two tab
 There can be many issues that can cause the migrated data to not match the source data for a table. To name a few, consider:
 
 - Mismatching collations in VARCHAR columns that can silently transform characters when they cannot be represented in the destination database.
-- Time zones that cannot represent certain times of the some days, due to daylight savings time switching. For example, some databases allow any TIMESTAMP while other cannot represent March 10, 2024 at 2:15 am in the America/New York time zone; the clock jumped from 1:59 am to 3:00 am that night.
+- Time zones that cannot represent certain times of the some days, due to daylight savings time switching. For example, some databases allow any TIMESTAMP while others cannot represent March 10, 2024 at 2:15 am in the America/New York time zone; the clock jumped from 1:59 am to 3:00 am that night.
 - Mismatching collations can sort alphabetic and non-alphabetic characters in very different ways in each database; the sorting order is crucial to correctly compute the hashes in each table.
 - Some databases are permissive when it comes to trailing spaces in foreign keys, while other require exact matches. An effort to fix those and trim them will necessarily produce a mismatch when comparing data.
 
