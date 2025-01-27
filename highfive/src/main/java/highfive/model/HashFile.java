@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -133,6 +134,8 @@ public class HashFile {
 
   }
 
+  private static final DecimalFormat DF = new DecimalFormat("#,##0");
+
   public ComparisonResult compareTo(final HashFile other, final String thisName, final String otherName) {
 
     ComparisonResult r = new ComparisonResult();
@@ -150,8 +153,9 @@ public class HashFile {
           r.addError("Failed to compare hashes for the table '" + table
               + "' in the databases; the hashing ordering is non-deterministic in " + where + ".");
         } else if (h.getRowCount() != o.getRowCount()) {
-          r.addError("Failed to compare hashes for the table '" + table + "'; the current table has " + h.getRowCount()
-              + " row(s) while the baseline table has " + o.getRowCount() + " row(s).");
+          r.addError("Failed to compare hashes for the table '" + table + "'; the current table has "
+              + DF.format(h.getRowCount()) + " row(s) while the baseline table has " + DF.format(o.getRowCount())
+              + " row(s).");
         } else if (Utl.distinct(h.getHash(), o.getHash())) {
           r.addError("Different hash values found for table '" + table + "' in the databases.");
         } else {
