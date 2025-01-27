@@ -207,9 +207,9 @@ The configurable properties are:
 
 ### Step 3 - Commands
 
-HighFive implements the essential commands to resolve the common uses cases and analysis commands to unravel the root cause and find a remedy to special cases when the migrated data does not fully match between databases.
+HighFive implements core commands to resolve the common uses cases and analysis commands to unravel the root cause and find a remedy to special cases when the migrated data does not fully match between databases.
 
-#### Essential Commands
+#### Core Commands
 
 These commands are used for the normal operation such as verifying migrated data, to copy data, and to verify preconditions for these operations.
 
@@ -218,7 +218,7 @@ These commands are used for the normal operation such as verifying migrated data
 | `listtables <datasource>` | Connects to the schema, list the tables in it, and checks they are all supported. Only tables and columns selected by the filters are considered. Useful to validate the connection and basic functionality |
 | `listcolumns <datasource>` | Connects to the schema, list the tables and their columns in it and verify they are all supported. Only tables and columns selected by the filters are considered |
 | `hash <datasource>` | Hashes the schema and saves the result to the file `<datasource>.hash` |
-| `verify <datasource> <baseline-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
+| `verify <datasource> <baseline-hash-file>` | Hashes the schema and saves the result to the file `<datasource>.hash`. It then compares the computed hashed results with the *baseline-file* to decide if the comparison succeeds or fails |
 | `copy <from-datasource> <to-datasource>` | Copies the data of the tables from a source datasource to a destination datasource. The destination tables must be empty. The destination datasource should not be readonly; that is, the property `<datasource>.readonly` should be explicitly set to `false`. The java types of the columns of the selected tables must match, even if the database types are different; use the `<datasource>.type.rules` to set java types explicitly. All database constraints and database auto-generated features should be disabled (or dropped) while the data is being copied |
 
 #### Analysis Commands
@@ -228,7 +228,7 @@ The analysis commands are used to find out the exact differences between two tab
 | Command | Description |
 | --  | -- |
 | `hashd <datasource> <table> [<start> <end> [<step>]]` | The Hash Dump command dumps row hashes for a single table to the file `<datasource>.dump`. If `start` and `end` are specified, it only dumps the specific row range of the table. If the `step` value is also specified it saves one hash every this number of rows (to reduce the size of the dump file) |
-| `hashc <datasource> <table> <dump-file>` | The Hash Compare command compares the a table against the baseline dump file produced by the `hashd` command. If it finds different hash values for a row, it displays the hashes and the row number where the first difference was found. It automatically detects the dump file range and step, if present, and acts accordingly |
+| `hashc <datasource> <table> <baseline-dump-file>` | The Hash Compare command compares the a table against the baseline dump file produced by the `hashd` command. If it finds different hash values for a row, it displays the hashes and the row number where the first difference was found. It automatically detects the dump file range and step, if present, and acts accordingly |
 | `hashl <datasource> <table> <start> <end>` | The Hash Log command displays the hash value for each field of each row of a table (very verbose). Can be used to find out why two seemingly identical tables in two databases are actually producing different hash values. Only the selected row range is displayed, although all previous rows are always read and computed |
 
 There can be many issues that can cause the migrated data to not match the source data for a table. To name a few, consider:

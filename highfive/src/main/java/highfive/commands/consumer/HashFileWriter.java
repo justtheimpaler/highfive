@@ -17,6 +17,12 @@ public class HashFileWriter implements HashConsumer {
   public HashFileWriter(String filename) {
     this.filename = filename;
     this.hashFile = new HashFile();
+    this.lastHasher = null;
+  }
+
+  @Override
+  public void initializeHasher(Hasher h) {
+    this.lastHasher = h;
   }
 
   @Override
@@ -38,7 +44,7 @@ public class HashFileWriter implements HashConsumer {
   }
 
   @Override
-  public void closeEntry(String genericName, boolean nonDeterministic) throws InvalidHashFileException {
+  public void consumeTable(String genericName, boolean nonDeterministic) throws InvalidHashFileException {
     String hash = Utl.toHex(this.lastHasher.close());
 //    System.out.println(">> HashFileWriter.closeEntry() - hash=" + hash);
     hashFile.add(hash, genericName, nonDeterministic);

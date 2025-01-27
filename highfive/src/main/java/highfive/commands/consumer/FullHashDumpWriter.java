@@ -21,6 +21,11 @@ public class FullHashDumpWriter implements HashConsumer {
   }
 
   @Override
+  public void initializeHasher(Hasher h) {
+    // Nothing to do
+  }
+
+  @Override
   public void consumeValueHeader(long row) {
   }
 
@@ -35,7 +40,7 @@ public class FullHashDumpWriter implements HashConsumer {
   }
 
   @Override
-  public void closeEntry(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException {
+  public void consumeTable(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException {
     // Nothing to do
   }
 

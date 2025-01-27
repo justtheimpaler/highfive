@@ -160,12 +160,18 @@ public class HighFive {
         }
       } else {
         if (args.length == 0) {
-          error("Must specify a command.");
+          error("The command was not found or the incorrect number of parameters was specified.");
         } else {
           error("Invalid command: " + args[0]);
         }
-        info("Usage: java -jar highfive.jar [ listtables <datasource> | listcolumns <datasource> "
-            + "| hash <datasource> | verify <datasource> <baseline-file> | copy <from-datasource> <to-datasource> ]");
+        info("Usage: java -jar highfive.jar listtables <datasource>");
+        info("       java -jar highfive.jar listcolumns <datasource>");
+        info("       java -jar highfive.jar copy <from-datasource> <to-datasource>");
+        info("       java -jar highfive.jar hash <datasource>");
+        info("       java -jar highfive.jar verify <datasource> <baseline-hash-file>");
+        info("       java -jar highfive.jar hashd <datasource> <table> [<start> <end> [<step>]]");
+        info("       java -jar highfive.jar hashc <datasource> <table> <baseline-dump-file>");
+        info("       java -jar highfive.jar hashl <datasource> <table> <start> <end>");
         System.exit(1);
       }
     } catch (NoSuchAlgorithmException | SQLException | IOException | InvalidConfigurationException

@@ -26,7 +26,6 @@ import highfive.model.Identifier;
 import highfive.model.Table;
 import highfive.model.TableHashingMember;
 import highfive.model.TableHashingOrdering;
-import highfive.utils.Utl;
 
 public abstract class GenericHashCommand extends DataSourceCommand {
 
@@ -98,7 +97,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     return null;
   }
 
-  protected void hashOneTable(Table t, HashConsumer hc)
+  protected void hashOneTable(Table t, HashConsumer consumer)
       throws CouldNotHashException, NoSuchAlgorithmException, SQLException {
     Identifier tn = t.getIdentifier();
 
@@ -117,6 +116,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       info("    * sql: " + sql);
     }
     Hasher h = new Hasher();
+
+    consumer.initializeHasher(h);
 
     this.ds.getConnection().setAutoCommit(true); // end the current transaction, if any
 
@@ -143,10 +144,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
             logCount = 0;
           }
 
-          hc.consumeValueHeader(row);
-//          if (this.ds.getLogHashingRange().includes(row)) {
-//            info("    * Row #" + row + ":");
-//          }
+          consumer.consumeValueHeader(row);
           int col = 1;
           byte[] bytes = null;
           for (Column c : t.getColumns()) {
@@ -168,13 +166,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               throw e;
             }
             h.apply(bytes);
-            
-            hc.consumeValue(row, c, bytes, h);
-//            if (this.ds.getLogHashingRange().includes(row)) {
-//              byte[] d = h.getInProgressDigest();
-//              info("      " + c.getName() + ": '" + c.getSerializer().getValue() + "' - encoded: " + Utl.toHex(bytes)
-//                  + " -- hash: " + Utl.toHex(d));
-//            }
+
+            consumer.consumeValue(row, c, bytes, h);
             col++;
           }
           if (ds.getMaxRows() != null && row >= ds.getMaxRows()) {
@@ -197,8 +190,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
           }
 
           rowComparator.next();
-          active = hc.consumeRow(row, h);
-//          info("-- Consumed line #" + line + " - active=" + active);
+          active = consumer.consumeRow(row, h);
 
         }
 
@@ -211,8 +203,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               + tn.getCanonicalName() + "'; only the first " + MAX_ORDERING_ERRORS + " were displayed.");
         }
 
-//        info(">> will close entry: " + t.getIdentifier().getGenericName());
-        hc.closeEntry(t.getIdentifier().getGenericName(), orderingErrors > 0);
+        consumer.consumeTable(t.getIdentifier().getGenericName(), orderingErrors > 0);
 
         info("    " + DF.format(row) + " row(s) read");
 

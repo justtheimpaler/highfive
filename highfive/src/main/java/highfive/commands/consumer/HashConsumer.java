@@ -10,6 +10,8 @@ import highfive.model.Hasher;
 
 public interface HashConsumer extends AutoCloseable {
 
+  void initializeHasher(Hasher h);
+
   void consumeValueHeader(long row);
 
   void consumeValue(long row, Column c, byte[] bytes, Hasher h) throws CloneNotSupportedException;
@@ -17,7 +19,7 @@ public interface HashConsumer extends AutoCloseable {
   boolean consumeRow(long row, Hasher hasher)
       throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException;
 
-  void closeEntry(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException;
+  void consumeTable(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException;
 
   public static class ExecutionStatus {
 
