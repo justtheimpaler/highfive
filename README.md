@@ -10,6 +10,8 @@ On the other side, HighFive can **compare the data between two (or more) databas
 
 It performs the comparison by computing hash values for each table in one database (the "baseline database") and then by computing again the hash values in the other database(s). If the data was copied correctly these hashes will fully match. The implemented strategy considers computing the hash values of all the data in both schemas using the SHA-256 algorithm. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
 
+For details on the available versions see [Version History](./version-history.md).
+
 ## Limitations
 
 This tool has the following limitations.
