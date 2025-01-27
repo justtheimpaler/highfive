@@ -214,7 +214,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               + tn.getCanonicalName() + "'; only the first " + MAX_ORDERING_ERRORS + " were displayed.");
         }
 
-        consumer.consumeTable(t.getIdentifier().getGenericName(), orderingErrors > 0);
+        consumer.consumeTable(t.getIdentifier().getGenericName(), orderingErrors > 0, row);
 
         info("    " + DF.format(row) + " row(s) read");
 

@@ -12,11 +12,16 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import highfive.exceptions.InvalidHashFileException;
 import highfive.utils.Utl;
 
 public class HashFile {
+
+  private static final Logger log = Logger.getLogger(HashFile.class.getName());
 
   private Map<String, Hash> map = new LinkedHashMap<>();
 
@@ -24,11 +29,13 @@ public class HashFile {
 
     private String hash;
     private boolean nonDeterministic;
+    private long rowCount;
 
-    public Hash(String hash, boolean nonDeterministic) {
+    public Hash(String hash, boolean nonDeterministic, long rowCount) {
       super();
       this.hash = hash;
       this.nonDeterministic = nonDeterministic;
+      this.rowCount = rowCount;
     }
 
     public String getHash() {
@@ -39,23 +46,29 @@ public class HashFile {
       return nonDeterministic;
     }
 
+    public long getRowCount() {
+      return rowCount;
+    }
+
   }
 
-  public void add(String hash, String table, boolean nonDeterministic) throws InvalidHashFileException {
+  public void add(String hash, boolean nonDeterministic, long rowCount, String table) throws InvalidHashFileException {
     if (this.map.containsKey(table)) {
       throw new InvalidHashFileException("Duplicate table '" + table + "'.");
     }
-    this.map.put(table, new Hash(hash, nonDeterministic));
+    this.map.put(table, new Hash(hash, nonDeterministic, rowCount));
   }
 
   public void saveTo(final String file) throws IOException {
     try (Writer w = new BufferedWriter(new FileWriter(new File(file)))) {
       for (String table : this.map.keySet()) {
         Hash h = this.map.get(table);
-        w.write(h.getHash() + (h.isNonDeterministic() ? "*" : "") + " " + table + "\n");
+        w.write(h.getHash() + (h.isNonDeterministic() ? "*" : "") + " " + h.getRowCount() + " " + table + "\n");
       }
     }
   }
+
+  private static final Pattern LINE_PATTERN = Pattern.compile("^([0-9a-f]{64})(\\*?) ([0-9]+) (.+)$");
 
   public static HashFile loadFrom(final String file)
       throws FileNotFoundException, IOException, InvalidHashFileException {
@@ -64,23 +77,25 @@ public class HashFile {
       String line;
       int lineNumber = 1;
       while ((line = r.readLine()) != null) {
-        if (!line.matches("^[0-9a-f]{64}\\*? .+$")) {
+        Matcher m = LINE_PATTERN.matcher(line);
+        if (!m.matches()) {
           throw new InvalidHashFileException("Line #" + lineNumber
               + " has an invalid hash format. Must be a 64-char hexa value (optionally followed by a star), "
               + "a space, and a table name (in lower case).");
-        }
-        String hash = line.substring(0, 64);
-        boolean nonDeterministic;
-        String table;
-        if (line.charAt(64) == '*') {
-          nonDeterministic = true;
-          table = line.substring(66);
         } else {
-          nonDeterministic = false;
-          table = line.substring(65);
+          String hash = m.group(1);
+
+          String star = m.group(2); // empty string or '*'
+          boolean nonDeterministic = star.equals("*");
+
+          String srows = m.group(3);
+          long rowCount = Long.parseLong(srows);
+
+          String table = m.group(4);
+
+          hf.add(hash, nonDeterministic, rowCount, table);
+          lineNumber++;
         }
-        hf.add(hash, table, nonDeterministic);
-        lineNumber++;
       }
     }
     return hf;
@@ -128,7 +143,16 @@ public class HashFile {
         r.addError("Table '" + table + "' found in the " + thisName + ", but not in the " + otherName + ".");
       } else {
         Hash o = other.map.get(table);
-        if (Utl.distinct(h.getHash(), o.getHash())) {
+        if (h.isNonDeterministic() || o.isNonDeterministic()) {
+          String where = h.isNonDeterministic()
+              ? (o.isNonDeterministic() ? "the live and baseline tables" : "the baseline table")
+              : "the live table";
+          r.addError("Failed to compare hashes for the table '" + table
+              + "' in the databases; the hashing ordering is non-deterministic in " + where + ".");
+        } else if (h.getRowCount() != o.getRowCount()) {
+          r.addError("Failed to compare hashes for the table '" + table + "'; the current table has " + h.getRowCount()
+              + " row(s) while the baseline table has " + o.getRowCount() + " row(s).");
+        } else if (Utl.distinct(h.getHash(), o.getHash())) {
           r.addError("Different hash values found for table '" + table + "' in the databases.");
         } else {
           r.addMatched();

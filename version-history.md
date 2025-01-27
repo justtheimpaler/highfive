@@ -2,6 +2,8 @@
 
 ## 1.2.8:
 
+- The verify command now checks for non-deterministic hashing ordering in either table.
+- The verify command now checks for the row count of the tables before comparing hashes.
 - Fixed hashing of empty tables.
 - Better messaging.
 

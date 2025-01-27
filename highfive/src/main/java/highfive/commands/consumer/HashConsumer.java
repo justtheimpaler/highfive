@@ -19,7 +19,7 @@ public interface HashConsumer extends AutoCloseable {
   boolean consumeRow(long row, Hasher hasher)
       throws IOException, CloneNotSupportedException, InvalidDumpFileException, DumpFileIOException;
 
-  void consumeTable(String genericName, boolean hasOrderingErrors) throws InvalidHashFileException;
+  void consumeTable(String genericName, boolean hasOrderingErrors, long rowCount) throws InvalidHashFileException;
 
   public static class ExecutionStatus {
 

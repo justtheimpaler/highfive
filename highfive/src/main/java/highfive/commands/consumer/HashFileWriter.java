@@ -44,10 +44,11 @@ public class HashFileWriter implements HashConsumer {
   }
 
   @Override
-  public void consumeTable(String genericName, boolean nonDeterministic) throws InvalidHashFileException {
+  public void consumeTable(String genericName, boolean nonDeterministic, long rowCount)
+      throws InvalidHashFileException {
     String hash = Utl.toHex(this.lastHasher.close());
 //    System.out.println(">> HashFileWriter.closeEntry() - hash=" + hash);
-    hashFile.add(hash, genericName, nonDeterministic);
+    hashFile.add(hash, nonDeterministic, rowCount, genericName);
   }
 
   @Override
