@@ -237,7 +237,7 @@ There can be many issues that can cause the migrated data to not match the sourc
 - Time zones that cannot represent certain times of the some days, due to daylight savings time switching. For example, some databases allow any TIMESTAMP while others cannot represent March 10, 2024 at 2:15 am in the America/New York time zone; the clock jumped from 1:59 am to 3:00 am that night.
 - Mismatching collations can sort alphabetic and non-alphabetic characters in very different ways in each database; the sorting order is crucial to correctly compute the hashes in each table.
 - Some databases are permissive when it comes to trailing spaces in foreign keys, while other require exact matches. An effort to fix those and trim them will necessarily produce a mismatch when comparing data.
-- Some databases sorts null first, others sort them last. Some can do both by using the `NULLS FIRST` or `NULLS LAST` clauses. It's critical to use the same ordering of nulls when hashing both databases.
+- Some databases sort nulls first, while others sort them last. Some databases are flexible to change this ordering (e.g. by adding the `NULLS FIRST` or `NULLS LAST` clauses) while others do not offer any flexibility. It's critical to find common ground and use the same ordering of nulls when hashing both databases.
 
 #### General Strategy To Resolve Mismatching Data In Tables
 
