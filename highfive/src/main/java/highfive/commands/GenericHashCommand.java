@@ -80,8 +80,10 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
     info(" ");
     info("Hashing:");
+    int cnt = 1;
     for (Table t : tables) {
-      hashOneTable(t, hc);
+      hashOneTable(t, hc, cnt, tables.size());
+      cnt++;
     }
 
     info("  Data hashes generated to: " + this.ds.getHashFileName());
@@ -99,9 +101,18 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
   protected void hashOneTable(Table t, HashConsumer consumer)
       throws CouldNotHashException, NoSuchAlgorithmException, SQLException {
+    this.hashOneTable(t, consumer, null, null);
+  }
+
+  protected void hashOneTable(Table t, HashConsumer consumer, Integer cnt, Integer total)
+      throws CouldNotHashException, NoSuchAlgorithmException, SQLException {
     Identifier tn = t.getIdentifier();
 
-    info("  Hashing table: " + tn.renderSQL());
+    if (cnt == null) {
+      info("  Hashing table: " + tn.renderSQL());
+    } else {
+      info("  Hashing table (" + cnt + "/" + total + "): " + tn.renderSQL());
+    }
 
     String names = t.getColumns().stream().map(c -> this.ds.getDialect().escapeIdentifierAsNeeded(c.getCanonicalName()))
         .collect(Collectors.joining(", "));

@@ -189,7 +189,6 @@ public class DataSource {
     }
     String columnFilterList = props.getProperty(name + ".column.filter");
     String sMaxRows = props.getProperty(name + ".max.rows");
-    String sLogHashingRange = props.getProperty(name + ".log.hashing.range");
     String sLogSQL = props.getProperty(name + ".log.sql");
     String sInsertBatchSize = props.getProperty(name + ".insert.batch.size");
     String typeRules = props.getProperty(name + ".type.rules");

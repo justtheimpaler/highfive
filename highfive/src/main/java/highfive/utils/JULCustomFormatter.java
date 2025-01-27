@@ -63,6 +63,7 @@ public class JULCustomFormatter extends Formatter {
     }
   }
 
+  @SuppressWarnings("unused")
   private void appendClassNameAndLineNumber(LogRecord record, StringBuilder builder) {
     StackTraceElement caller = findCaller(Thread.currentThread().getStackTrace());
     if (caller != null) {

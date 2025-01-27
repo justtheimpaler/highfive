@@ -5,7 +5,6 @@
 - Fixed hashing of empty tables.
 - Better messaging.
 
-
 ## 1.2.7:
 
 - Analysis commands (hashd, hashc, and hashl) implemented.

@@ -14,10 +14,12 @@ public class HashLogger implements HashConsumer {
 
   private static final Logger log = Logger.getLogger(HashLogger.class.getName());
 
+  @SuppressWarnings("unused")
   private String tableName;
   private long start;
   private long end;
 
+  @SuppressWarnings("unused")
   private ExecutionStatus status;
 
   public HashLogger(String tableName, long start, long end) throws InvalidDumpFileException, DumpFileIOException {
