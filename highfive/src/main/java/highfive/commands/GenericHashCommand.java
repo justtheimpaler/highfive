@@ -195,8 +195,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
                   + orderingErrors + "); found at least two rows with the same value in the ordering columns ("
                   + rowComparator.getOrderingColumns().stream().collect(Collectors.joining(", "))
                   + "), but different values in the rest of the columns:");
-              error(" * Row 1: " + rowComparator.renderPreviousRow());
-              error(" * Row 2: " + rowComparator.renderCurrentRow());
+              error(" * Previous row: " + rowComparator.renderPreviousRow());
+              error(" * Current row: " + rowComparator.renderCurrentRow());
             }
           }
 
