@@ -130,7 +130,7 @@ public class HashComparator implements HashConsumer {
   }
 
   @Override
-  public void consumeTable(String genericName, boolean hasOrderingErrors, long rowCount)
+  public void consumeTable(String genericName, boolean nonDeterministic, boolean failed, long rowCount)
       throws InvalidHashFileException {
     if (this.status != null) {
       return;

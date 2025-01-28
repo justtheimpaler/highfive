@@ -45,7 +45,7 @@ public class RangeHashDumpWriter implements HashConsumer {
   }
 
   @Override
-  public void consumeTable(String genericName, boolean hasOrderingErrors, long rowCount)
+  public void consumeTable(String genericName, boolean nonDeterministic, boolean failed, long rowCount)
       throws InvalidHashFileException {
     // Nothing to do
   }

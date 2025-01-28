@@ -134,6 +134,10 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
     this.ds.getConnection().setAutoCommit(this.ds.getSelectAutoCommit());
 
+    int row = 0;
+    int orderingErrors = 0;
+    boolean tableConsumed = false;
+
     try (PreparedStatement ps = this.ds.getConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
         ResultSet.CONCUR_READ_ONLY);) {
 
@@ -143,8 +147,8 @@ public abstract class GenericHashCommand extends DataSourceCommand {
 
       try (ResultSet rs = ps.executeQuery();) {
         int logCount = 0;
-        int row = 0;
-        int orderingErrors = 0;
+        row = 0;
+        orderingErrors = 0;
         boolean active = true;
 
         while (rs.next() && active) {
@@ -214,12 +218,22 @@ public abstract class GenericHashCommand extends DataSourceCommand {
               + tn.getCanonicalName() + "'; only the first " + MAX_ORDERING_ERRORS + " were displayed.");
         }
 
-        consumer.consumeTable(t.getIdentifier().getGenericName(), orderingErrors > 0, row);
+        consumer.consumeTable(t.getIdentifier().getGenericName(), orderingErrors > 0, false, row);
+        tableConsumed = true;
 
         info("    " + DF.format(row) + " row(s) read");
 
       } catch (Throwable e) {
         e.printStackTrace(System.out);
+        info("tableConsumed=" + tableConsumed);
+        if (!tableConsumed) {
+          try {
+            consumer.consumeTable(t.getIdentifier().getGenericName(), orderingErrors > 0, true, row);
+          } catch (InvalidHashFileException e1) {
+            error("Could not save hash for table '" + t.getIdentifier().getGenericName() + "'.");
+            e.printStackTrace(System.out);
+          }
+        }
         info("    Failed to read table " + tn.getGenericName() + " -- skipped");
       }
     }
