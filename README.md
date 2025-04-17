@@ -68,7 +68,7 @@ It's not difficult to support more data types (just implement more serializers).
 You can check if all data types in your schema are actually supported by running the `listtables`
 command described below.
 
-See [Appendix A - Supported Data Types](#appendix-a-supported-data-types) for the full list of supported types in each database.
+See [Appendix A - Supported Data Types](#appendix-a---supported-data-types) for the full list of supported types in each database.
 
 ### 5. Compares Identical Data With No Transformation
 
