@@ -1,14 +1,14 @@
 # HighFive
 
-HighFive helps with migrating data from one database to another, especially when these databases are of different vendors.
+HighFive copies and verifies data being migrated from one database to another, especially when these databases are of different vendors. Therefore, it includes two functionalities.
 
-One one side, HighFive can **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
+HighFive can **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
 
-HighFive comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for data copying or verification. Third-party tools that specialize in this scenarios can have high licensing costs. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
+It comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for data copying or verification. Third-party tools that specialize in this scenarios can have high licensing costs. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
 
-On the other side, HighFive can **compare the data between two (or more) databases**. This is particularly useful to verify the data was copied correctly to a destination database -- by this tool or by another one.
+HighFive can **compare the data between two or more databases**. This extra functionality can ensure your data was fully and correctly copied to the destination database. The verification tool can be used whether or not the data had been copied by HighFive or any other tool.
 
-It performs the comparison by computing hash values for each table in one database (the "baseline database") and then by computing again the hash values in the other database(s). If the data was copied correctly these hashes will fully match. The implemented strategy considers computing the hash values of all the data in both schemas using the SHA-256 algorithm. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
+It performs the comparison by computing hash values for each table in one database -- the "baseline database" -- and then by computing again the hash values in the other database(s). If the data was copied correctly the SHA-256 hashes will fully match. The implemented strategy considers computing the hash values table-by-table of all the data in both schemas. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
 
 For details on the available versions see [Version History](./version-history.md).
 
@@ -37,7 +37,7 @@ There are other tools in the market that migrate the structure of the schemas fr
 Once the table structures are ready HighFive can start migrating data.
 
 
-### 3. To Verify Data The Tables Must Be Sortable
+### 3. To Verify The Data The Tables Must Be Sortable
 
 For data verification process to be able to work, the tables must be sortable. This only required for data verification purposes, not when copying data.
 
@@ -54,7 +54,7 @@ produce no duplicate rows for the ordering columns, so a non-nullable unique con
 
 Finally, if none of the hashing ordering are practical for a table, the table can be excluded from the verification using the property `<datasource>.table.filter`. In this case, this table would fall outside the scope of this tool and would need to be verified in a different way.
 
-See the section **Hashing Ordering** for details on how to declare specific orderings.
+See the section [Hashing Ordering](#3-hashing-ordering) for details on how to declare specific orderings.
 
 ### 4. Supported Data Types
 
@@ -68,7 +68,7 @@ It's not difficult to support more data types (just implement more serializers).
 You can check if all data types in your schema are actually supported by running the `listtables`
 command described below.
 
-See **Appendix A - Supported Data Types** for the full list of supported types in each database.
+See [Appendix A - Supported Data Types](#appendix-a-supported-data-types) for the full list of supported types in each database.
 
 ### 5. Compares Identical Data With No Transformation
 

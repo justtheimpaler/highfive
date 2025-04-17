@@ -1,4 +1,4 @@
-# HashFive -- Version History
+# HighFive -- Version History
 
 ## 1.2.8:
 
