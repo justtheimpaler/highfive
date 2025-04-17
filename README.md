@@ -1,12 +1,12 @@
 # HighFive
 
-HighFive copies and verifies data being migrated from one database to another, especially when these databases are of different vendors. Therefore, it includes two functionalities.
+HighFive copies and verifies data between databases. It works with databases of the same or different brand. It includes two functionalities.
 
 HighFive can **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
 
 It comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for data copying or verification. Third-party tools that specialize in this scenarios can have high licensing costs. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
 
-HighFive can **compare the data between two or more databases**. This extra functionality can ensure your data was fully and correctly copied to the destination database. The verification tool can be used whether or not the data had been copied by HighFive or any other tool.
+HighFive can **compare and verify the data between two or more databases**. This functionality can ensure your data was fully and correctly copied to the destination database. The verification functionality is generic and can be used separately, whether the data was copied by this tool or any other one.
 
 It performs the comparison by computing hash values for each table in one database -- the "baseline database" -- and then by computing again the hash values in the other database(s). If the data was copied correctly the SHA-256 hashes will fully match. The implemented strategy considers computing the hash values table-by-table of all the data in both schemas. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
 
@@ -198,9 +198,9 @@ The configurable properties are:
 | `<datasource>.remove.table.prefix`  | Optional. A prefix to be removed from the table names. If your table "client" was renamed as "old_client" and you still want it to be recorded in the hash file as "client", then specify "old_" in this property. This value is case-insensitive
 | `<datasource>.column.filter`        | Optional. A list of comma-separated column names that will be included in the hash. Columns not mentioned in this list will be excluded from the hashing and validation. This value is case-insensitive |
 | `<datasource>.max.rows`             | Optional. Limits the maximum number of rows per table to be hashed. Could be useful for test runs of for debugging if you want to work with a small and fast data set |
-| `<datasource>.select.autocommit`    | Optional. Overrides the default autocommit mode for SELECT queries. PostgreSQL defaults to `false` while the other databases default to `true`. This autocommit mode is used to run large SELECT queries. For more details see the section **Autocommit While Reading** [Autocommit While Reading](#1-autocommit-while-reading) below |
+| `<datasource>.select.autocommit`    | Optional. Overrides the default autocommit mode for SELECT queries. PostgreSQL defaults to `false` while the other databases default to `true`. This autocommit mode is used to run large SELECT queries. For more details see the section [Autocommit While Reading](#1-autocommit-while-reading) below |
 | `<datasource>.select.fetch.size`    | Optional. Used in conjunction with `<datasource>.select.autocommit` to enable buffering in SELECTs in some databases. If not specified defaults to 100 |
-| `<datasource>.type.rules`           | Optional. Rules to override the default Java types used for each database type; it's a semicolon-separated list of rules. For more details see the section **Type Rules** [Type Rules](#2-type-rules) below |
+| `<datasource>.type.rules`           | Optional. Rules to override the default Java types used for each database type; it's a semicolon-separated list of rules. For more details see the section  [Type Rules](#2-type-rules) below |
 | `<datasource>.hashing.ordering` | Optional. Declares hashing ordering. It overrides the primary key ordering for tables with primary keys, and declares a specific ordering for tables with no primary keys. It takes the form of a semicolon-separated list of table sorting rules. For more details see the section [Hashing Ordering](#3-hashing-ordering) below |
 | `<datasource>.hashing.collation`    | Optional. Specifies the collation for the VARCHAR/CHAR columns used in the sorting ordering when hashing the data of the tables. This is particularly useful when two databases use different collations and sort rows in different order by default. If specified, this collation will be applied to all VARCHAR/CHAR columns in the ORDER BY clause, notwithstanding they belong to the primary key or other index/constraint on the table. This is only used for sorting purposes, not for converting/massaging data before hashing |
 | `<datasource>.readonly` | Optional. Declares this datasource as readonly (default) or writable. This property is  a safeguard to protect the datasources when copying data. A destination datasouce needs to be explicitly set as writable (`readonly=false`) for the `copy` command to work |
@@ -379,9 +379,9 @@ The hashes were saved to a hash file with the name of the datasource and the ext
 that is, to the file `src.hash`. The content of it looks like:
 
 ```bash
-f5a9d70a5ad127b7ef06e5e50f5328db9ac33fb2cda28283d00ac181155f1a28 client
-b8cea9c6031acd9bc08c88d83243891a724403682b924e50d81b3c123a6090a0 invoice
-45db23a2968a19c94ef142ecce37e18acdca97200653744bce1cd13ec4599177 payment
+f5a9d70a5ad127b7ef06e5e50f5328db9ac33fb2cda28283d00ac181155f1a28 101782 client
+b8cea9c6031acd9bc08c88d83243891a724403682b924e50d81b3c123a6090a0 25668 invoice
+45db23a2968a19c94ef142ecce37e18acdca97200653744bce1cd13ec4599177 22018 payment
 ```
 
 These hashes will be compared to the destination table in the next step.
@@ -423,9 +423,9 @@ datasource and the extension `.hash`; in this case this file is `dest.hash`. The
 this file looks like:
 
 ```bash
-f5a9d70a5ad127b7ef06e5e50f5328db9ac33fb2cda28283d00ac181155f1a28 client
-b8cea9c6031acd9bc08c88d83243891a724403682b924e50d81b3c123a6090a0 invoice
-45db23a2968a19c94ef142ecce37e18acdca97200653744bce1cd13ec4599177 payment
+f5a9d70a5ad127b7ef06e5e50f5328db9ac33fb2cda28283d00ac181155f1a28 101782 client
+b8cea9c6031acd9bc08c88d83243891a724403682b924e50d81b3c123a6090a0 25668 invoice
+45db23a2968a19c94ef142ecce37e18acdca97200653744bce1cd13ec4599177 22018 payment
 ```
 
 In this case it looks exactly as the previous one, and that's why the verification succeeded. If data corruption had taken place, you would see different values compared to the original one.
