@@ -1,6 +1,6 @@
 # HighFive
 
-HighFive copies and verifies data between databases. It works with databases of the same or different brand. It includes two functionalities.
+HighFive copies and verifies data between databases. It works with databases of the same or different brand.
 
 HighFive can **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
 
@@ -207,7 +207,7 @@ The configurable properties are:
 | `<datasource>.insert.batch.size` | Optional. Declares the insert batch size when copying data from one database to another. Defaults to 100 |
 | `<datasource>.log.sql`              | Optional. Defaults to `false`. Log the SQL queries executed in the datasource |
 
-### Step 3 - Commands
+### Step 4 - Commands
 
 HighFive implements core commands to resolve the common uses cases and analysis commands to unravel the root cause and find a remedy to special cases when the migrated data does not fully match between databases.
 
@@ -283,7 +283,7 @@ More datasources can also be configured in the `application.properties` file to 
 We can run a validation of the preconditions of both schemas using the command `listtables`. We can do:
 
 ```bash
-$ java -jar highfive-1.2.0.jar listtables src
+$ java -jar highfive-1.2.8.jar listtables src
 2024-08-12 11:54:32.110 INFO  - HighFive 1.2.0 - build 20240812-132812 - Command: List Tables
 2024-08-12 11:54:32.111 INFO  -  
 2024-08-12 11:54:32.426 INFO  - DataSource:
@@ -320,7 +320,7 @@ $ java -jar highfive-1.2.0.jar listtables src
 The same validation can be run in the destination schema just changing the last parameter:
 
 ```bash
-$ java -jar highfive-1.2.0.jar listtables dest
+$ java -jar highfive-1.2.8.jar listtables dest
 2024-07-31 09:37:46.254 INFO  - HighFive 1.2.0 - build 20240812-132812 - Command: List Tables
 2024-07-31 09:37:46.255 INFO  -  
 2024-07-31 09:37:46.260 INFO  - Configuration:
@@ -355,7 +355,7 @@ $ java -jar highfive-1.2.0.jar listtables dest
 We can hash the "src" schema by doing:
 
 ```bash
-$ java -jar highfive-1.2.0.jar hash src
+$ java -jar highfive-1.2.8.jar hash src
 2024-07-31 09:42:44.236 INFO  - HighFive 1.2.0 - build 20240812-132812 - Command: Hash Data
 2024-07-31 09:42:44.236 INFO  -  
 2024-07-31 09:42:44.243 INFO  - Configuration:
@@ -391,7 +391,7 @@ These hashes will be compared to the destination table in the next step.
 To validate the data of the tables of a schema against precomputed hashed values you can do:
 
 ```bash
-$ java -jar highfive-1.2.0.jar verify dest src.hash
+$ java -jar highfive-1.2.8.jar verify dest src.hash
 2024-07-31 09:46:18.257 INFO  - HighFive 1.2.0 - build 20240812-132812 - Command: Verify Data
 2024-07-31 09:46:18.257 INFO  -  
 2024-07-31 09:46:18.264 INFO  - Configuration:
@@ -430,10 +430,7 @@ b8cea9c6031acd9bc08c88d83243891a724403682b924e50d81b3c123a6090a0 25668 invoice
 
 In this case it looks exactly as the previous one, and that's why the verification succeeded. If data corruption had taken place, you would see different values compared to the original one.
 
-In case the data is different you can try to identify the offending data by:
-
-- Narrowing down by table (by applying table filters) and comparing hashes.
-- Narrowing down by table rows (by limiting the rows) and running successive hashing and verifications.
+In case the data is different you can try to identify the offending data by using the [Analysis Commands](#analysis-commands).
 
 ### Example 4 - Copying Data Between Databases
 
@@ -453,12 +450,12 @@ are empty. If data is found in these tables the copy stops.
 
 1. The java types of the columns in the source and destination databases must match, even if the actual database
 types are different. Use the `<datasource>.type.rules` to set java types explicitly in one or both datasources if
-the default java types don't match. See the section **Type Rules** below for details on how to designate java types.
+the default java types don't match. See the section [Type Rules](#2-type-rules) below for details on how to designate java types.
 
 The following example illustrates how to copy data:
 
 ```bash
-$ java -jar highfive-1.2.0 copy src dest
+$ java -jar highfive-1.2.8 copy src dest
 2024-08-13 11:01:00.181 INFO  - HighFive 1.2.0 - build 20240813-125250 - Command: Copy Data
 2024-08-13 11:01:00.181 INFO  -  
 2024-08-13 11:01:00.763 INFO  - Source Datasource:
@@ -634,7 +631,7 @@ create table CLIENT ( -- Case #4 - Has a unique constraint on multiple non-nulla
   unique (BRANCH_ID, CLIENT_NUMBER)
 );
 
-create table PAYMENT ( -- Case #5 - No indexes, no constraints; can use all columns for sorting purposes
+create table PAYMENT ( -- Case #5 - No indexes, no constraints; use all columns for sorting purposes
   RECEIVED_AT timestamp,
   AMOUNT decimal(12, 2),
   ACCOUNT_ID int
@@ -707,15 +704,18 @@ only.
 
 The following data types are supported in Oracle:
 
-- char, varchar2
-- nchar, nvarchar2
-- clob, nclob
-- number
-- float, binary_float, binary_double
-- date (with time component)
-- timestamp, timestamp with time zone, timestamp with local time zone
-- blob
-- raw, long raw
+| Database Type | Java Type |
+| === | === |
+| char, varchar2 | String |
+| nchar, nvarchar2 | String |
+| clob, nclob | String |
+| number(p,s), decimal(p, s) | if s != 0: BigDecimal<br/>- if p <= 9: Integer<br/>- if p <= 18: Long<br/>- otherwise BigInteger |
+| float, binary_float, binary_double | Double |
+| date (always has time component) | LocalDateTime |
+| timestamp | LocalDateTime |
+| timestamp with time zone, timestamp with local time zone | ZonedDateTime |
+| blob | ByteArray |
+| raw, long raw | ByteArray |
 
 ### DB2 LUW
 
