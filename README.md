@@ -551,9 +551,11 @@ The available java-types are:
 
 Most of the time the java types automatically selected by this tool are adequate and stable for hashing. However, there are some exceptions, particularly for database or database types that are old or badly defined.
 
+See [Appendix A - Supported Data Types](#appendix-a---supported-data-types) for the specific data types supported in each database.
+
 #### Examples
 
-For example, the `DATE` type in the Oracle database seems to imply that it stores dates without time, but in fact it stores both. By default, this tool reads this data as `LocalDateTime` to preserve the time component of it. However, when the data is migrated maybe only the date part ends up making it through to the other database; for verification purposes that would require you to compare them as plain dates. Therefore, if you wanted to read `DATE` columns just as `LocalDate` (discarding the time component) you could do so by adding a rule in the form `<database-type>:<java-type>`; in this case this rule can look like:
+For example, the `DATE` type in the Oracle database seems to imply that it stores dates without time, but in fact it stores both. By default, this tool reads this data as `localdatetime` to preserve the time component of it. However, when the data is migrated maybe only the date part ends up making it through to the other database; for verification purposes that would require you to compare them as plain dates. Therefore, if you wanted to read `DATE` columns just as `localdate` (discarding the time component) you could do so by adding a rule in the form `<database-type>:<java-type>`; in this case this rule can look like:
 
 ```bash
   <datasource>.type.rules=date:localdate
@@ -706,16 +708,16 @@ The following table shows the Java types for each supported data type in the Ora
 
 | Database Type | Java Type |
 | -- | -- |
-| char, varchar2 | String |
-| nchar, nvarchar2 | String |
-| clob, nclob | String |
-| number(p, s), decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: BigInteger |
-| float, binary_float, binary_double | Double |
-| date | LocalDateTime |
-| timestamp | LocalDateTime |
-| timestamp with time zone,<br/>timestamp with local time zone | ZonedDateTime |
-| blob | ByteArray |
-| raw, long raw | ByteArray |
+| char, varchar2 | string |
+| nchar, nvarchar2 | string |
+| clob, nclob | string |
+| number(p, s), decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: biginteger |
+| float, binary_float, binary_double | double |
+| date | localdatetime |
+| timestamp | localdatetime |
+| timestamp with time zone,<br/>timestamp with local time zone | zoneddatetime |
+| blob | bytearray |
+| raw, long raw | bytearray |
 
 **Note**: The `date` type in Oracle always include a time component; it's not just a date.
 
@@ -725,19 +727,19 @@ The following table shows the Java types for each supported data type in the DB2
 
 | Database Type | Java Type |
 | -- | -- |
-| char, varchar | String |
-| nchar, nvarchar | String |
-| clob, nclob | String |
-| dbclob | String |
-| graphic, vargraphic | String |
-| smallint, int | Integer |
-| bigint | Long |
-| numeric, decimal  | BigDecimal |
-| decfloat, real, float, double | Double |
-| date | LocalDate |
-| time | LocalTime |
-| timestamp | LocalDateTime |
-| blob | ByteArray |
+| char, varchar | string |
+| nchar, nvarchar | string |
+| clob, nclob | string |
+| dbclob | string |
+| graphic, vargraphic | string |
+| smallint, int | integer |
+| bigint | long |
+| numeric, decimal  | bigdecimal |
+| decfloat, real, float, double | double |
+| date | localdate |
+| time | localtime |
+| timestamp | localdatetime |
+| blob | bytearray |
 
 ### PostgreSQL
 
@@ -745,18 +747,18 @@ The following table shows the Java types for each supported data type in the Pos
 
 | Database Type | Java Type |
 | -- | -- |
-| char, varchar | String |
-| text | String |
-| smallint, integer  | Integer |
-| bigint | BigInteger |
-| decimal, numeric | BigDecimal |
-| real, double precision | Double |
-| date | LocalDate |
-| timestamp without time zone | LocalDateTime |
-| timestamp with time zone | OffsetDateTime |
-| time without time zone | LocalTime |
-| bytea | ByteArray |
-| boolean | Boolean |
+| char, varchar | string |
+| text | string |
+| smallint, integer  | integer |
+| bigint | biginteger |
+| decimal, numeric | bigdecimal |
+| real, double precision | double |
+| date | localdate |
+| timestamp without time zone | localdatetime |
+| timestamp with time zone | offsetdatetime |
+| time without time zone | localtime |
+| bytea | bytearray |
+| boolean | boolean |
 
 ### SQL Server
 
@@ -764,23 +766,23 @@ The following table shows the Java types for each supported data type in the Pos
 
 | Database Type | Java Type |
 | -- | -- |
-| char, varchar | String |
-| nchar, nvarchar | String |
-| text, ntext | String |
-| sysname | String |
-| decimal, numeric | BigDecimal |
-| money, smallmoney | BigDecimal |
-| tinyint, smallint, int, bigint | Integer |
-| bit | Integer |
-| float, real | Double |
-| date | LocalDate |
-| datetime, smalldatetime, datetime2 | LocalDateTime |
-| datetimeoffset | OffsetDateTime |
-| time | LocalTime |
-| binary, varbinary | ByteArray |
-| image | ByteArray |
-| uniqueidentifier | ByteArray |
-| xml | String |
+| char, varchar | string |
+| nchar, nvarchar | string |
+| text, ntext | string |
+| sysname | string |
+| bit, tinyint, smallint, int | integer |
+| bigint | long |
+| decimal, numeric | bigdecimal |
+| money, smallmoney | bigdecimal |
+| float, real | double |
+| date | localdate |
+| datetime, smalldatetime, datetime2 | localdatetime |
+| datetimeoffset | offsetdatetime |
+| time | localtime |
+| binary, varbinary | bytearray |
+| image | bytearray |
+| uniqueidentifier | bytearray |
+| xml | string |
 
 ### MySQL
 
@@ -788,20 +790,20 @@ The following table shows the Java types for each supported data type in the MyS
 
 | Database Type | Java Type |
 | -- | -- |
-| char, varchar | String |
-| tinytext, text, mediumtext, longtext | String |
+| char, varchar | string |
+| tinytext, text, mediumtext, longtext | string |
 | tinyint, smallint, mediumint, int | Integer |
-| unsigned int, bigint | Long |
-| unsigned bigint | BigInteger |
-| decimal | BigDecimal |
-| float, double | Double |
-| unsigned double | BigDecimal |
-| date | Date |
-| datetime | LocalDateTime |
-| timestamp | OffsetDateTime |
-| time | LocalTime |
-| year | Integer |
-| tinyblob, blob, mediumblob, longblob | ByteArray |
+| unsigned int, bigint | long |
+| unsigned bigint | biginteger |
+| decimal | bigDdcimal |
+| float, double | double |
+| unsigned double | bigdecimal |
+| date | date |
+| datetime | localdatetime |
+| timestamp | offsetdatetime |
+| time | localtime |
+| year | integer |
+| tinyblob, blob, mediumblob, longblob | bytearray |
 
 ### MariaDB
 
@@ -809,21 +811,21 @@ The following table shows the Java types for each supported data type in the Mar
 
 | Database Type | Java Type |
 | -- | -- |
-| char, varchar | String |
-| tinytext, text, mediumtext, longtext | String |
-| tinyint, smallint, mediumint, int | Integer |
-| unsigned int, bigint | Long |
-| unsigned bigint | BigInteger |
-| decimal | BigDecimal |
-| float, double | Double |
-| unsigned double | BigDecimal |
-| date | LocalDate |
-| datetime | LocalDateTime |
-| timestamp | OffsetDateTime |
-| time | LocalTime |
-| year | Integer |
-| tinyblob, blob, mediumblob, longblob | ByteArray |
-| bit | ByteArray |
+| char, varchar | string |
+| tinytext, text, mediumtext, longtext | string |
+| tinyint, smallint, mediumint, int | integer |
+| unsigned int, bigint | long |
+| unsigned bigint | biginteger |
+| decimal | bigdecimal |
+| float, double | double |
+| unsigned double | bigdecimal |
+| date | localdate |
+| datetime | localdatetime |
+| timestamp | offsetdatetime |
+| time | localtime |
+| year | integer |
+| tinyblob, blob, mediumblob, longblob | bytearray |
+| bit | bytearray |
 
 
 
