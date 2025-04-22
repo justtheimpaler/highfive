@@ -705,15 +705,15 @@ only.
 The following data types are supported in Oracle:
 
 | Database Type | Java Type |
-| === | === |
+| -- | -- |
 | char, varchar2 | String |
 | nchar, nvarchar2 | String |
 | clob, nclob | String |
-| number(p,s), decimal(p, s) | if s != 0: BigDecimal<br/>- if p <= 9: Integer<br/>- if p <= 18: Long<br/>- otherwise BigInteger |
+| number(p,s), decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: BigInteger |
 | float, binary_float, binary_double | Double |
 | date (always has time component) | LocalDateTime |
 | timestamp | LocalDateTime |
-| timestamp with time zone, timestamp with local time zone | ZonedDateTime |
+| timestamp with time zone,<br/>timestamp with local time zone | ZonedDateTime |
 | blob | ByteArray |
 | raw, long raw | ByteArray |
 
