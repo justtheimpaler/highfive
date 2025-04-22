@@ -702,107 +702,128 @@ only.
 
 ### Oracle
 
-The following table shows the Java types for each supported data type ion the Oracle database:
+The following table shows the Java types for each supported data type in the Oracle database:
 
 | Database Type | Java Type |
 | -- | -- |
-| char,<br/>varchar2 | String |
-| nchar,<br/>nvarchar2 | String |
-| clob,<br/>nclob | String |
-| number(p, s),<br/>decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: BigInteger |
-| float,<br/>binary_float,<br/>binary_double | Double |
+| char, varchar2 | String |
+| nchar, nvarchar2 | String |
+| clob, nclob | String |
+| number(p, s), decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: BigInteger |
+| float, binary_float, binary_double | Double |
 | date | LocalDateTime |
 | timestamp | LocalDateTime |
 | timestamp with time zone,<br/>timestamp with local time zone | ZonedDateTime |
 | blob | ByteArray |
-| raw,<br/>long raw | ByteArray |
+| raw, long raw | ByteArray |
+
+**Note**: The `date` type in Oracle always include a time component; it's not just a date.
 
 ### DB2 LUW
 
-The following table shows the Java types for each supported data type ion the DB2 LUW database:
+The following table shows the Java types for each supported data type in the DB2 LUW database:
 
 | Database Type | Java Type |
 | -- | -- |
-- char, varchar
-- nchar, nvarchar
-- clob, nclob
-- dbclob
-- graphic, vargraphic
-- smallint, int, bigint
-- numeric, decimal
-- decfloat, real, float, double
-- date
-- time
-- timestamp
-- blob
+| char, varchar | String |
+| nchar, nvarchar | String |
+| clob, nclob | String |
+| dbclob | String |
+| graphic, vargraphic | String |
+| smallint, int | Integer |
+| bigint | Long |
+| numeric, decimal  | BigDecimal |
+| decfloat, real, float, double | Double |
+| date | LocalDate |
+| time | LocalTime |
+| timestamp | LocalDateTime |
+| blob | ByteArray |
 
 ### PostgreSQL
 
-The following data types are supported in PostgreSQL:
+The following table shows the Java types for each supported data type in the PostgreSQL database:
 
-- character (char), character varying (varchar)
-- text
-- smallint, integer, bigint
-- decimal, numeric
-- real, double precision
-- date
-- timestamp without time zone (timestamp)
-- timestamp with time zone (timestamptz)
-- time without time zone (time)
-- bytea
-- boolean
+| Database Type | Java Type |
+| -- | -- |
+| char, varchar | String |
+| text | String |
+| smallint, integer  | Integer |
+| bigint | BigInteger |
+| decimal, numeric | BigDecimal |
+| real, double precision | Double |
+| date | LocalDate |
+| timestamp without time zone | LocalDateTime |
+| timestamp with time zone | OffsetDateTime |
+| time without time zone | LocalTime |
+| bytea | ByteArray |
+| boolean | Boolean |
 
 ### SQL Server
 
-The following data types are supported in SQL Server:
+The following table shows the Java types for each supported data type in the PostgreSQL database:
 
-- char, varchar
-- nchar, nvarchar
-- text, ntext
-- sysname
-- decimal, numeric
-- money, smallmoney
-- tinyint, smallint, int, bigint
-- bit
-- float, real
-- date
-- datetime, smalldatetime, datetime2, datetimeoffset
-- time
-- binary, varbinary
-- image
-- uniqueidentifier
-- xml
+| Database Type | Java Type |
+| -- | -- |
+| char, varchar | String |
+| nchar, nvarchar | String |
+| text, ntext | String |
+| sysname | String |
+| decimal, numeric | BigDecimal |
+| money, smallmoney | BigDecimal |
+| tinyint, smallint, int, bigint | Integer |
+| bit | Integer |
+| float, real | Double |
+| date | LocalDate |
+| datetime, smalldatetime, datetime2 | LocalDateTime |
+| datetimeoffset | OffsetDateTime |
+| time | LocalTime |
+| binary, varbinary | ByteArray |
+| image | ByteArray |
+| uniqueidentifier | ByteArray |
+| xml | String |
 
 ### MySQL
 
-The following data types are supported in MySQL:
+The following table shows the Java types for each supported data type in the MySQL database:
 
-- char, varchar
-- tinytext, text, mediumtext, longtext
-- tinyint, smallint, mediumint, int, bigint (normal and unsigned)
-- decimal
-- float, double (normal and unsigned)
-- date
-- datetime
-- timestamp
-- time, year
-- tinyblob, blob, mediumblob, longblob
+| Database Type | Java Type |
+| -- | -- |
+| char, varchar | String |
+| tinytext, text, mediumtext, longtext | String |
+| tinyint, smallint, mediumint, int | Integer |
+| unsigned int, bigint | Long |
+| unsigned bigint | BigInteger |
+| decimal | BigDecimal |
+| float, double | Double |
+| unsigned double | BigDecimal |
+| date | Date |
+| datetime | LocalDateTime |
+| timestamp | OffsetDateTime |
+| time | LocalTime |
+| year | Integer |
+| tinyblob, blob, mediumblob, longblob | ByteArray |
 
 ### MariaDB
 
-The following data types are supported in MariaDB:
+The following table shows the Java types for each supported data type in the MariaDB database:
 
-- char, varchar
-- tinytext, text, mediumtext, longtext
-- tinyint, smallint, mediumint, int, bigint (normal and unsigned)
-- decimal
-- float, double (normal and unsigned)
-- date
-- datetime
-- timestamp
-- time, year
-- tinyblob, blob, mediumblob, longblob
-- bit
+| Database Type | Java Type |
+| -- | -- |
+| char, varchar | String |
+| tinytext, text, mediumtext, longtext | String |
+| tinyint, smallint, mediumint, int | Integer |
+| unsigned int, bigint | Long |
+| unsigned bigint | BigInteger |
+| decimal | BigDecimal |
+| float, double | Double |
+| unsigned double | BigDecimal |
+| date | LocalDate |
+| datetime | LocalDateTime |
+| timestamp | OffsetDateTime |
+| time | LocalTime |
+| year | Integer |
+| tinyblob, blob, mediumblob, longblob | ByteArray |
+| bit | ByteArray |
 
 
 
