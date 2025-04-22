@@ -702,25 +702,27 @@ only.
 
 ### Oracle
 
-The following data types are supported in Oracle:
+The following table shows the Java types for each supported data type ion the Oracle database:
 
 | Database Type | Java Type |
 | -- | -- |
-| char, varchar2 | String |
-| nchar, nvarchar2 | String |
-| clob, nclob | String |
-| number(p,s), decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: BigInteger |
-| float, binary_float, binary_double | Double |
-| date (always has time component) | LocalDateTime |
+| char,<br/>varchar2 | String |
+| nchar,<br/>nvarchar2 | String |
+| clob,<br/>nclob | String |
+| number(p, s),<br/>decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: BigInteger |
+| float,<br/>binary_float,<br/>binary_double | Double |
+| date | LocalDateTime |
 | timestamp | LocalDateTime |
 | timestamp with time zone,<br/>timestamp with local time zone | ZonedDateTime |
 | blob | ByteArray |
-| raw, long raw | ByteArray |
+| raw,<br/>long raw | ByteArray |
 
 ### DB2 LUW
 
-The following data types are supported in DB2 LOW:
+The following table shows the Java types for each supported data type ion the DB2 LUW database:
 
+| Database Type | Java Type |
+| -- | -- |
 - char, varchar
 - nchar, nvarchar
 - clob, nclob
