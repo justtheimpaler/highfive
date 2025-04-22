@@ -711,15 +711,16 @@ The following table shows the Java types for each supported data type in the Ora
 | char, varchar2 | string |
 | nchar, nvarchar2 | string |
 | clob, nclob | string |
-| number(p, s), decimal(p, s) | if s != 0: BigDecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: Integer<br/>&nbsp;&nbsp;&bull; if p <= 18: Long<br/>&nbsp;&nbsp;&bull; if p > 18: biginteger |
+| number(p, s), decimal(p, s) | if s != 0: bigdecimal<br/>if s = 0:<br/>&nbsp;&nbsp;&bull; if p <= 9: integer<br/>&nbsp;&nbsp;&bull; if p <= 18: long<br/>&nbsp;&nbsp;&bull; if p > 18: biginteger |
 | float, binary_float, binary_double | double |
-| date | localdatetime |
+| date* | localdatetime |
 | timestamp | localdatetime |
 | timestamp with time zone,<br/>timestamp with local time zone | zoneddatetime |
 | blob | bytearray |
 | raw, long raw | bytearray |
 
-**Note**: The `date` type in Oracle always include a time component; it's not just a date.
+\* The `date` type in Oracle always include a time component; it's not just a date.
+
 
 ### DB2 LUW
 
@@ -795,7 +796,7 @@ The following table shows the Java types for each supported data type in the MyS
 | tinyint, smallint, mediumint, int | Integer |
 | unsigned int, bigint | long |
 | unsigned bigint | biginteger |
-| decimal | bigDdcimal |
+| decimal | bigdecimal |
 | float, double | double |
 | unsigned double | bigdecimal |
 | date | date |
