@@ -1,6 +1,6 @@
 # HighFive
 
-HighFive copies data between databases and verifies the data as been correctly copied. Unlike typical database tools, it functions effectively between databases of the same or different brands.
+HighFive copies data between databases and verifies that the data as been accurately copied. Unlike typical database tools, it functions effectively between databases of the same or different brands.
 
 HighFive can **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
 
