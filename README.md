@@ -1,14 +1,14 @@
 # HighFive
 
-HighFive copies and verifies data between databases. It works with databases of the same or different brand.
+HighFive copies data between databases and verifies the data as been correctly copied. It works between databases of the same or different brand.
 
 HighFive can **copy the data from one database to another**. For example, it can be used to migrate the data from an Oracle database to a PostgreSQL database (or vice versa).
 
-It comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for data copying or verification. Third-party tools that specialize in this scenarios can have high licensing costs. HighFive can be a great fit for the most common cases, when the databases do not include exotic features such as special data types, unorthodox table names or column names.
+It comes with a default data type conversion strategy that can be customized. When the databases belong to different vendors (e.g. a database migration), typical vendor-specific tools that only work between instances of the same database brand are not useful for data copying or verification. Third-party tools that specialize in these scenarios can have high licensing costs. HighFive can be a great fit for the most common cases.
 
-HighFive can **compare and verify the data between two or more databases**. This functionality can ensure your data was fully and correctly copied to the destination database. The verification functionality is generic and can be used separately, whether the data was copied by this tool or any other one.
+HighFive can **compare and verify the data between two or more databases**. This functionality can ensure your data was fully and correctly copied to the destination database. The verification functionality is separate and can be applied whether the data was copied by this tool or another one.
 
-It performs the comparison by computing hash values for each table in one database -- the "baseline database" -- and then by computing again the hash values in the other database(s). If the data was copied correctly the SHA-256 hashes will fully match. The implemented strategy considers computing the hash values table-by-table of all the data in both schemas. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
+It performs the comparison by computing hash values for each table in one database -- the *baseline database* -- and then by computing again the hash values in the destination database(s) once the data has been copied there. If the data was copied correctly the SHA-256 hashes will fully match. The implemented strategy considers computing the hash values table-by-table of all the data in both schemas. Once this is done it becomes trivial to compare the hashed values between schemas and decide if they fully match or not.
 
 For details on the available versions see [Version History](./version-history.md).
 
