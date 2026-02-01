@@ -8,7 +8,7 @@ It comes with a default data type conversion strategy that can be customized. Wh
 
 HighFive can **compare and verify the data between two or more databases**. This functionality can ensure your data was fully and correctly copied to the destination database. The verification functionality is separate and can be applied whether the data was copied by this tool or by a different one.
 
-It performs the comparison by computing hash values for each table in one database &emdash; the *baseline database* &emdash; and then by computing again the hash values in the destination database(s) once the data has been copied there. If the data was copied correctly the SHA-256 hashes will fully match. The implemented strategy considers computing the hash values table-by-table of all the data in both databases. Once this is complete, it becomes trivial to compare the hashed values between databases and decide if they fully match or not.
+It performs the comparison by computing hash values for each table in one database &mdash; the *baseline database* &mdash; and then by computing again the hash values in the destination database(s) once the data has been copied there. If the data was copied correctly the SHA-256 hashes will fully match. The implemented strategy considers computing the hash values table-by-table of all the data in both databases. Once this is complete, it becomes trivial to compare the hashed values between databases and decide if they fully match or not.
 
 For details on the available versions see [Version History](./version-history.md).
 
@@ -109,7 +109,7 @@ create table "Invoice" (
 ```
 
 In practice cases like these ones would be extremely rare. They are not cases that we will be encounter
-often &emdash; or at all &emdash; in business-grade databases.
+often &mdash; or at all &mdash; in business-grade databases.
 
 ## Usage
 
