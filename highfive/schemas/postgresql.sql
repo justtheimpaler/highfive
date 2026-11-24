@@ -20,6 +20,17 @@ insert into t1.kitchen (id, name) values
   (101, 'Anne'),
   (102, 'Peter');
 
+create table main_account (
+  id int primary key not null,
+  amount numeric(20, 0),
+  debt decimal(20, 0)
+);
+
+insert into main_account (id, amount, debt) values (101, 12345678901234567890, 22345678901234567890);
+insert into main_account (id, amount, debt) values (102, 12345678901234567891, 22345678901234567891);
+insert into main_account (id, amount, debt) values (103, 12345678901234567892, 22345678901234567892);
+
+  
 -- Separate 't1' schema for tables without PK nor unique constraints/indexes.
 
 create table t1.w (a int, b int, c int, d macaddr);

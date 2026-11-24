@@ -22,6 +22,16 @@ insert into kitchen (id, name) values (101, 'Anne');
 
 insert into kitchen (id, name) values (102, 'Peter');
 
+create table main_account (
+  id number(8) primary key not null,
+  amount number(20, 0),
+  debt number(20, 0)
+);
+
+insert into main_account (id, amount, debt) values (101, 12345678901234567890, 22345678901234567890);
+insert into main_account (id, amount, debt) values (102, 12345678901234567891, 22345678901234567891);
+insert into main_account (id, amount, debt) values (103, 12345678901234567892, 22345678901234567892);
+
 create table data (
   id number(8) primary key not null,
   i number(8),
