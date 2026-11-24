@@ -46,7 +46,7 @@ public class SQLServerDialect extends Dialect {
     List<Identifier> tables = new ArrayList<>();
     String sql = "select name from " + (ds.getCatalog() == null || ds.getCatalog().isEmpty() ? ""
         : this.escapeIdentifierAsNeeded(ds.getCatalog()) + ".") + "sys.tables where schema_name(schema_id) = ?";
-//    System.out.println("sql=" + sql);
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, ds.getSchema());
       try (ResultSet rs = ps.executeQuery();) {
@@ -80,7 +80,7 @@ public class SQLServerDialect extends Dialect {
         + ") ix\n" //
         + "where c.object_id = object_id('" + cat + escapeIdentifierAsNeeded(ds.getSchema()) + "." + tn.renderSQL()
         + "')";
-//    System.out.println("sql=" + sql);
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       try (ResultSet rs = ps.executeQuery();) {
         while (rs.next()) {

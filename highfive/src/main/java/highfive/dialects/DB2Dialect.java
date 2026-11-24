@@ -41,6 +41,7 @@ public class DB2Dialect extends Dialect {
   public List<Identifier> listTablesNames() throws SQLException, InvalidSchemaException {
     List<Identifier> tables = new ArrayList<>();
     String sql = "select name from sysibm.systables where creator = ? and type = 'T'";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, ds.getSchema());
       try (ResultSet rs = ps.executeQuery();) {
@@ -63,6 +64,7 @@ public class DB2Dialect extends Dialect {
     List<Column> columns = new ArrayList<>();
     String sql = "select name, typename, length, scale, keyseq "
         + "from sysibm.syscolumns where tbcreator = ? and tbname = ?";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, ds.getSchema());
       ps.setString(2, tn.getCanonicalName());

@@ -52,6 +52,7 @@ public class PostgreSQLDialect extends Dialect {
   public List<Identifier> listTablesNames() throws SQLException, InvalidSchemaException {
     List<Identifier> tables = new ArrayList<>();
     String sql = "select table_name from information_schema.tables where table_schema = ?";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, ds.getSchema());
       try (ResultSet rs = ps.executeQuery();) {
@@ -79,6 +80,7 @@ public class PostgreSQLDialect extends Dialect {
     List<Column> columns = new ArrayList<>();
     String sql = "select column_name, data_type, character_maximum_length, numeric_precision, numeric_scale\n"
         + "from information_schema.columns where table_schema = ? and table_name = ?";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, ds.getSchema());
       ps.setString(2, tn.getCanonicalName());

@@ -36,6 +36,7 @@ public class OracleDialect extends Dialect {
 
   public OracleDialect(DataSource ds, Connection conn) {
     super(ds, conn);
+    log.fine("init");
   }
 
   @Override
@@ -47,6 +48,7 @@ public class OracleDialect extends Dialect {
   public List<Identifier> listTablesNames() throws SQLException, InvalidSchemaException {
     List<Identifier> tables = new ArrayList<>();
     String sql = "select table_name from all_tables where owner = ?";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, ds.getSchema());
       try (ResultSet rs = ps.executeQuery();) {
@@ -74,6 +76,7 @@ public class OracleDialect extends Dialect {
     List<Column> columns = new ArrayList<>();
     String sql = "select column_name, data_type, data_length, data_precision, data_scale "
         + "from all_tab_columns where owner = ? and table_name = ?";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, ds.getSchema());
       ps.setString(2, tn.getCanonicalName());
@@ -106,6 +109,7 @@ public class OracleDialect extends Dialect {
     String sql = "select c.column_name, c.position " + "from all_cons_columns c "
         + "join all_constraints x on x.constraint_name = c.constraint_name and x.owner = c.owner "
         + "where x.owner = ? and x.table_name = ? and x.constraint_type = 'P'";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       ps.setString(1, schema);
       ps.setString(2, table.getCanonicalName());

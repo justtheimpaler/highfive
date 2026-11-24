@@ -48,6 +48,7 @@ public class MySQLDialect extends Dialect {
   public List<Identifier> listTablesNames() throws SQLException, InvalidSchemaException {
     List<Identifier> tables = new ArrayList<>();
     String sql = "select table_name from information_schema.tables where table_schema = ? and table_type = 'BASE TABLE'";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       String database = Utl.coalesce(ds.getCatalog(), ds.getSchema());
       ps.setString(1, database);
@@ -76,6 +77,7 @@ public class MySQLDialect extends Dialect {
     List<Column> columns = new ArrayList<>();
     String sql = "select column_name, data_type, character_maximum_length, numeric_precision, numeric_scale, column_type "
         + "from information_schema.columns where table_schema = ? and table_name = ?";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       String database = Utl.coalesce(ds.getCatalog(), ds.getSchema());
       ps.setString(1, database);
@@ -171,6 +173,7 @@ public class MySQLDialect extends Dialect {
       throws SQLException {
     String sql = "select column_name, ordinal_position " + "from information_schema.key_column_usage "
         + "where table_schema = ? and constraint_name = 'PRIMARY' and table_name = ?";
+    super.ds.logSQL(sql);
     try (PreparedStatement ps = conn.prepareStatement(sql);) {
       String database = Utl.coalesce(catalog, schema);
       ps.setString(1, database);
