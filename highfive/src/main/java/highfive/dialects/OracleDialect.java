@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import highfive.exceptions.InvalidSchemaException;
@@ -30,6 +31,8 @@ import highfive.serializers.StringSerializer;
 import highfive.serializers.ZonedDateTimeSerializer;
 
 public class OracleDialect extends Dialect {
+
+  private static final Logger log = Logger.getLogger(OracleDialect.class.getName());
 
   public OracleDialect(DataSource ds, Connection conn) {
     super(ds, conn);
@@ -149,6 +152,15 @@ public class OracleDialect extends Dialect {
   @Override
   protected Serializer<?> getDefaultSerializer(Identifier table, String name, String type, boolean unsigned,
       BigInteger maxLength, Integer precision, Integer scale) throws UnsupportedDatabaseTypeException {
+//    log.info("* getDefaultSerializer: " + table.getCanonicalName() + "." + name + " type=" + type + " unsigned="
+//        + unsigned + " maxLength=" + maxLength + " precision=" + precision + " scale=" + scale);
+    Serializer<?> s = computeDefaultSerializer(table, name, type, precision, scale);
+//    log.info(" -> Resolved as: " + s.getClass().getSimpleName());
+    return s;
+  }
+
+  private Serializer<?> computeDefaultSerializer(Identifier table, String name, String type, Integer precision,
+      Integer scale) throws UnsupportedDatabaseTypeException {
     if (type == null) {
       throw new UnsupportedDatabaseTypeException(
           "Unsupported column type for column " + name + " in table " + table + ": " + type);
@@ -165,7 +177,7 @@ public class OracleDialect extends Dialect {
         } else if (precision <= 18) {
           return new LongSerializer();
         } else {
-          return new BigIntegerSerializer();
+          return new BigDecimalSerializer();
         }
       } else {
         return new BigDecimalSerializer();
