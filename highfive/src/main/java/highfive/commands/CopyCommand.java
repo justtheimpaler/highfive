@@ -196,12 +196,16 @@ public class CopyCommand extends DualDataSourceCommand {
 
       this.ds.getConnection().setAutoCommit(this.ds.getSelectAutoCommit());
 
+      this.ds.logSQL(select);
+
       try (PreparedStatement selectPS = this.ds.getConnection().prepareStatement(select, ResultSet.TYPE_FORWARD_ONLY,
           ResultSet.CONCUR_READ_ONLY);) {
 
         if (this.ds.getSelectFetchSize() != null) {
           selectPS.setFetchSize(this.ds.getSelectFetchSize());
         }
+
+        this.ds2.logSQL(insert);
 
         try (
             PreparedStatement insertPS = this.ds2.getConnection().prepareStatement(insert, ResultSet.TYPE_FORWARD_ONLY,

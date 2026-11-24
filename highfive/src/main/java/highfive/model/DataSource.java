@@ -492,6 +492,12 @@ public class DataSource {
 
   }
 
+  public void logSQL(final String s) {
+    if (logSQL) {
+      info("  * SQL: " + s);
+    }
+  }
+
   // Getters
 
   public String getName() {
@@ -544,10 +550,6 @@ public class DataSource {
 
   public String getHashingCollation() {
     return hashingCollation;
-  }
-
-  public boolean getLogSQL() {
-    return logSQL;
   }
 
   public long getInsertBatchSize() {
