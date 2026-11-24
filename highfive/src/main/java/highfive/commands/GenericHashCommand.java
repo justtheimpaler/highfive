@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,10 +30,9 @@ import highfive.model.TableHashingOrdering;
 
 public abstract class GenericHashCommand extends DataSourceCommand {
 
-  private static final int MAX_ORDERING_ERRORS = 3;
+  private static final Logger log = Logger.getLogger(GenericHashCommand.class.getName());
 
-//  @Deprecated
-//  protected HashFile hashFile;
+  private static final int MAX_ORDERING_ERRORS = 3;
 
   public GenericHashCommand(final String commandName, final String datasourceName)
       throws InvalidConfigurationException, SQLException, UnsupportedDatabaseTypeException {
@@ -44,8 +44,6 @@ public abstract class GenericHashCommand extends DataSourceCommand {
       NoSuchAlgorithmException, InvalidHashFileException, InvalidConfigurationException, IOException {
 
     List<Identifier> tableNames = this.ds.getDialect().listTablesNames();
-//    info("hashDumpConfig=" + hashDumpConfig);
-//    if (hashDumpConfig == null) {
 
     // 1. Validate tables
 
@@ -123,9 +121,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
     String tid = this.ds.getDialect().renderSQLTableIdentifier(tn);
     String sql = "select" + this.ds.getDialect().renderHeadLimit(ds.getMaxRows()) + " " + names + " from " + tid
         + " order by " + selectOrdering + this.ds.getDialect().renderTailLimit(ds.getMaxRows());
-    if (this.ds.getLogSQL()) {
-      info("    * sql: " + sql);
-    }
+    this.ds.logSQL(sql);
     Hasher h = new Hasher();
 
     consumer.initializeHasher(h);
@@ -286,7 +282,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
             sb.append(", ");
           }
 
-          String cm = this.ds.getDialect().escapeIdentifierAsNeeded(m.getGenericColumnName());
+          String cm = this.ds.getDialect().escapeIdentifierAsNeeded(col.getCanonicalName());
           if (col.getSerializer().canUseACollation() && this.ds.getHashingCollation() != null) {
             cm = this.ds.getDialect().addCollation(cm, this.ds.getHashingCollation());
           }
