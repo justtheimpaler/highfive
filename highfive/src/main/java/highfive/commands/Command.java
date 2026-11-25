@@ -22,6 +22,7 @@ public abstract class Command {
     this.commandName = commandName;
     info("HighFive " + BuildInformation.VERSION + " - build " + BuildInformation.BUILD_ID + " - Command: "
         + this.commandName);
+    info("Source code & docs available at https://github.com/justtheimpaler/highfive");
     info(" ");
   }
 
