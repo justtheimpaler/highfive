@@ -9,7 +9,6 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Logger;
 
-import highfive.BuildInformation;
 import highfive.exceptions.CouldNotCopyDataException;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
@@ -25,7 +24,6 @@ import highfive.utils.Name;
 
 public abstract class DataSourceCommand extends Command {
 
-  @SuppressWarnings("unused")
   private static final Logger log = Logger.getLogger(DataSourceCommand.class.getName());
 
   protected DataSource ds;
@@ -33,9 +31,7 @@ public abstract class DataSourceCommand extends Command {
   public DataSourceCommand(final String commandName, final String datasourceName)
       throws InvalidConfigurationException, SQLException, UnsupportedDatabaseTypeException {
     super(commandName);
-    info("HighFive " + BuildInformation.VERSION + " - build " + BuildInformation.BUILD_ID + " - Command: "
-        + super.getCommandName());
-    info(" ");
+    log.fine("DataSourceCommand created for datasource: " + datasourceName);
     this.ds = DataSource.load(datasourceName);
   }
 

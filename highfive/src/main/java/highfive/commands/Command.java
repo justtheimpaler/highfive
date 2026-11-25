@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import highfive.BuildInformation;
 import highfive.exceptions.CouldNotCopyDataException;
 import highfive.exceptions.CouldNotHashException;
 import highfive.exceptions.InvalidConfigurationException;
@@ -19,6 +20,9 @@ public abstract class Command {
 
   public Command(String commandName) {
     this.commandName = commandName;
+    info("HighFive " + BuildInformation.VERSION + " - build " + BuildInformation.BUILD_ID + " - Command: "
+        + this.commandName);
+    info(" ");
   }
 
   protected String getCommandName() {

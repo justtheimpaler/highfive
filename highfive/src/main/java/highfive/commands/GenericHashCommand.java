@@ -37,6 +37,7 @@ public abstract class GenericHashCommand extends DataSourceCommand {
   public GenericHashCommand(final String commandName, final String datasourceName)
       throws InvalidConfigurationException, SQLException, UnsupportedDatabaseTypeException {
     super(commandName, datasourceName);
+    log.fine("GenericHashCommand created for datasource: " + datasourceName);
   }
 
   protected void hashOneSchema(final HashConsumer hc)
