@@ -2,9 +2,9 @@
 
 ## 1.2.9:
 
-- NUMBER serializer to 'bigdecimal' in Oracle for numeric integers with precision greather than 18 digits.
-- Fixing hashing.ordering for declared columns (Oracle).
-- Improved SQL logging.
+- NUMBER serializer to 'bigdecimal' in Oracle for numeric integers with precision greater than 18 digits.
+- Fixing hashing ordering for declared columns (Oracle).
+- Comprehensive SQL logging.
 
 ## 1.2.8:
 
